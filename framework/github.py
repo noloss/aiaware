@@ -56,6 +56,16 @@ def get_issue(number: int) -> dict:
     return json.loads(raw)
 
 
+def find_open_pr_for_issue(issue_number: int) -> int | None:
+    """Return open PR number that closes this issue, or None."""
+    raw = _run(["pr", "list", "--repo", GITHUB_REPO, "--state", "open",
+                "--json", "number,body"]).stdout
+    for pr in json.loads(raw):
+        if f"Closes #{issue_number}" in pr.get("body", ""):
+            return pr["number"]
+    return None
+
+
 def create_pr(title: str, body: str, base: str = "main") -> int:
     """Push current branch and open a PR, return PR number."""
     ensure_labels(["needs-review", "needs-work", "LGTM"])

@@ -7,6 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from framework.coder import run_issue
+from framework.github import find_open_pr_for_issue
 from framework.reviewer import review_pr
 
 MAX_RETRIES = 3
@@ -34,12 +35,17 @@ def run_release(release_number: int) -> None:
         print(f"{'='*60}")
 
         feedback = None
-        pr_number = None
+
+        # Resume from existing open PR if one already exists
+        pr_number = find_open_pr_for_issue(issue_number)
+        if pr_number:
+            print(f"Found existing PR #{pr_number}, resuming reviewer loop.")
 
         for attempt in range(1, MAX_RETRIES + 1):
             print(f"\n--- Attempt {attempt}/{MAX_RETRIES} ---")
 
-            pr_number = run_issue(issue_number, feedback=feedback)
+            if not pr_number:
+                pr_number = run_issue(issue_number, feedback=feedback)
             if not pr_number:
                 print(f"Coder produced no PR for issue #{issue_number}, skipping.")
                 break
@@ -48,11 +54,13 @@ def run_release(release_number: int) -> None:
 
             if verdict == "LGTM":
                 print(f"\n✓ Issue #{issue_number} done (PR #{pr_number} merged).")
+                pr_number = None
                 break
 
             if attempt < MAX_RETRIES:
                 print(f"\nRetrying with reviewer feedback...")
                 feedback = comment
+                pr_number = None  # coder will push new commit and we re-fetch PR
             else:
                 print(
                     f"\n✗ Issue #{issue_number} still needs work after {MAX_RETRIES} attempts. "
