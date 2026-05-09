@@ -41,7 +41,18 @@
   opacity: 1;
 }
 
-/* High-severity variant — shown for patterns like credit card numbers. */
+/* Medium-severity variant — orange — shown for password patterns. */
+#ps-dlp-banner.ps-medium {
+  background: #FFEDD5;
+  color: #9A3412;
+  border-color: #F97316;
+}
+
+#ps-dlp-banner.ps-medium #ps-dlp-dismiss {
+  color: #9A3412;
+}
+
+/* High-severity variant — red — shown for API keys, SSNs, credit cards. */
 #ps-dlp-banner.ps-high {
   background: #FEE2E2;
   color: #991B1B;
