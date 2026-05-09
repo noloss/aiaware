@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from framework.coder import run_issue
-from framework.github import find_open_pr_for_issue
+from framework.github import find_open_pr_for_issue, is_issue_done
 from framework.reviewer import review_pr
 
 MAX_RETRIES = 3
@@ -33,6 +33,10 @@ def run_release(release_number: int) -> None:
         print(f"\n{'='*60}")
         print(f"Issue #{issue_number}: {task['title']}")
         print(f"{'='*60}")
+
+        if is_issue_done(issue_number):
+            print(f"✓ Issue #{issue_number} already done, skipping.")
+            continue
 
         feedback = None
 

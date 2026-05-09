@@ -66,6 +66,13 @@ def find_open_pr_for_issue(issue_number: int) -> int | None:
     return None
 
 
+def is_issue_done(issue_number: int) -> bool:
+    """Return True if the issue is closed (merged PR or manually closed)."""
+    raw = _run(["issue", "view", str(issue_number), "--repo", GITHUB_REPO,
+                "--json", "state"]).stdout
+    return json.loads(raw).get("state", "") == "CLOSED"
+
+
 def create_pr(title: str, body: str, base: str = "main") -> int:
     """Push current branch and open a PR, return PR number."""
     ensure_labels(["needs-review", "needs-work", "LGTM"])
