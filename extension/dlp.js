@@ -230,20 +230,32 @@
     if (banner) banner.style.display = 'none';
   }
 
-  let debounceTimer = null;
+  // ---------------------------------------------------------------------------
+  // Debounce — detection runs at most once per DEBOUNCE_MS after the last
+  // input event, keeping fast typing lag-free.
+  //
+  // Timers are tracked per element so that simultaneous inputs (e.g. two
+  // textareas in the same page) never cancel each other's pending scans.
+  // ---------------------------------------------------------------------------
+  const DEBOUNCE_MS = 300;
+
+  /** @type {WeakMap<Element, ReturnType<typeof setTimeout>>} */
+  const debounceTimers = new WeakMap();
+
   function onInput(el) {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
+    clearTimeout(debounceTimers.get(el));
+    debounceTimers.set(el, setTimeout(() => {
+      debounceTimers.delete(el);
       const text = getInputText(el);
       const hits = scanText(text);
       if (hits.length > 0) {
         showBanner(hits, el);
       } else {
         hideBanner();
-        // Reset dismiss so banner can reappear if user pastes again later
+        // Reset dismiss so banner can reappear if user pastes again later.
         sessionStorage.removeItem(DISMISS_KEY);
       }
-    }, 300);
+    }, DEBOUNCE_MS));
   }
 
   const attached = new WeakSet();
