@@ -36,7 +36,7 @@ python framework/reviewer.py --pr <N>   # Reviewaa PR, hyväksyy tai palauttaa
 
 ## Kieli
 
-Kaikki agent-promptit ja issuet englanninkielisiä. Kommentit koodissa suomeksi tai englanniksi.
+Kaikki agent-promptit ja issuet englanninkielisiä. Kommentit koodissa englanniksi.
 
 ## Tärkeää
 
