@@ -1,0 +1,34 @@
+/* Minimal popup styles */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 280px;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  color: #1e1b4b;
+  background: #f5f3ff;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #6366f1;
+  color: #fff;
+}
+
+header h1 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+main {
+  padding: 16px;
+}
+
+#status {
+  color: #4338ca;
+  font-size: 13px;
+}
