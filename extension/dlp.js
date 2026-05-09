@@ -374,26 +374,24 @@
     const heading = document.createElement('h2');
     heading.id = 'ps-intercept-title';
     heading.className = 'ps-heading';
-    heading.textContent = 'Security Intercept';
+    heading.textContent = 'Tietoturvavaroitus';
 
     const body = document.createElement('p');
     body.className = 'ps-body';
     body.textContent =
-      'PromptSentinel detected high-severity sensitive data in your message. ' +
-      'Sending it may expose credentials or personal information. ' +
-      "Cancel to review, or send anyway if you're sure.";
+      'Syötteessäsi on arkaluonteista tietoa. Haluatko varmasti lähettää?';
 
     const actions = document.createElement('div');
     actions.className = 'ps-actions';
 
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'ps-btn ps-btn-close';
-    cancelBtn.textContent = 'Cancel — review message';
+    cancelBtn.textContent = 'Peruuta';
     cancelBtn.addEventListener('click', closeIntercept);
 
     const sendBtn = document.createElement('button');
     sendBtn.className = 'ps-btn ps-btn-proceed';
-    sendBtn.textContent = 'Send anyway';
+    sendBtn.textContent = 'Lähetä silti';
     sendBtn.addEventListener('click', () => {
       closeIntercept();
       clickPlatformSubmit();
