@@ -34,7 +34,8 @@
       "matches": [
         "*://claude.ai/*",
         "*://*.claude.ai/*",
-        "*://gemini.google.com/*"
+        "*://gemini.google.com/*",
+        "*://chat.openai.com/*"
       ],
       "js": ["content.js", "modal.js", "dlp.js"],
       "css": ["modal.css", "dlp.css"],

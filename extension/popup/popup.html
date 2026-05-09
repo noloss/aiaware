@@ -14,6 +14,17 @@
 
   <main>
     <p id="status">Extension active — monitoring this page.</p>
+
+    <section class="ps-settings">
+      <label class="ps-toggle-row" for="shadow-block-toggle">
+        <span class="ps-toggle-label">Shadow Block</span>
+        <input type="checkbox" id="shadow-block-toggle" />
+      </label>
+      <p class="ps-setting-desc">
+        Block message submission when a 🔴 High sensitive-data alert is active.
+        You'll see a Security Intercept popup before anything is sent.
+      </p>
+    </section>
   </main>
 
   <script src="popup.js" type="module"></script>

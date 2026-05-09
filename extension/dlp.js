@@ -292,4 +292,149 @@
   observer.observe(document.body, { childList: true, subtree: true });
 
   findAndAttach();
+
+  // ---------------------------------------------------------------------------
+  // Shadow Block — intercept Enter key submission when a 🔴 High alert is
+  // active and the user has enabled Shadow Block in the popup.
+  // ---------------------------------------------------------------------------
+
+  let shadowBlockEnabled = false;
+
+  // Load initial setting from storage.
+  chrome.storage.local.get(['shadowBlockEnabled'], ({ shadowBlockEnabled: val }) => {
+    shadowBlockEnabled = !!val;
+  });
+
+  // Stay in sync when the popup toggles the setting.
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && 'shadowBlockEnabled' in changes) {
+      shadowBlockEnabled = !!changes.shadowBlockEnabled.newValue;
+    }
+  });
+
+  /** Returns true when the DLP banner is currently showing a High-severity hit. */
+  function isHighBannerActive() {
+    const banner = document.getElementById(BANNER_ID);
+    return (
+      banner != null &&
+      banner.style.display !== 'none' &&
+      banner.classList.contains('ps-high')
+    );
+  }
+
+  // Submit-button selectors tried in order across all supported platforms.
+  const SUBMIT_SELECTORS = [
+    // ChatGPT
+    'button[data-testid="send-button"]',
+    // Claude.ai
+    'button[aria-label="Send Message"]',
+    'button[aria-label="Send message"]',
+    // Gemini
+    'button.send-button',
+    // Generic fallback
+    'button[aria-label*="Send"]',
+    'button[type="submit"]',
+  ];
+
+  /** Click the platform's native send / submit button. */
+  function clickPlatformSubmit() {
+    for (const sel of SUBMIT_SELECTORS) {
+      const btn = document.querySelector(sel);
+      if (btn) {
+        btn.click();
+        return;
+      }
+    }
+  }
+
+  const INTERCEPT_OVERLAY_ID = 'ps-intercept-overlay';
+
+  function closeIntercept() {
+    const el = document.getElementById(INTERCEPT_OVERLAY_ID);
+    if (el) el.remove();
+  }
+
+  /** Show the Security Intercept popup, giving the user a chance to cancel. */
+  function showInterceptPopup() {
+    closeIntercept(); // dismiss any stale overlay
+
+    const overlay = document.createElement('div');
+    overlay.id = INTERCEPT_OVERLAY_ID;
+    overlay.className = 'ps-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'ps-intercept-title');
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeIntercept();
+    });
+
+    const dialog = document.createElement('div');
+    dialog.className = 'ps-dialog';
+
+    const icon = document.createElement('div');
+    icon.className = 'ps-icon';
+    icon.textContent = '🛡️';
+    icon.setAttribute('aria-hidden', 'true');
+
+    const heading = document.createElement('h2');
+    heading.id = 'ps-intercept-title';
+    heading.className = 'ps-heading';
+    heading.textContent = 'Security Intercept';
+
+    const body = document.createElement('p');
+    body.className = 'ps-body';
+    body.textContent =
+      'PromptSentinel detected high-severity sensitive data in your message. ' +
+      'Sending it may expose credentials or personal information. ' +
+      "Cancel to review, or send anyway if you're sure.";
+
+    const actions = document.createElement('div');
+    actions.className = 'ps-actions';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'ps-btn ps-btn-close';
+    cancelBtn.textContent = 'Cancel — review message';
+    cancelBtn.addEventListener('click', closeIntercept);
+
+    const sendBtn = document.createElement('button');
+    sendBtn.className = 'ps-btn ps-btn-proceed';
+    sendBtn.textContent = 'Send anyway';
+    sendBtn.addEventListener('click', () => {
+      closeIntercept();
+      clickPlatformSubmit();
+    });
+
+    actions.append(cancelBtn, sendBtn);
+    dialog.append(icon, heading, body, actions);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+
+    cancelBtn.focus();
+  }
+
+  // Close the intercept popup with Escape.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById(INTERCEPT_OVERLAY_ID)) {
+      e.preventDefault();
+      closeIntercept();
+    }
+  }, /* capture = */ true);
+
+  // Capture-phase listener so we run before the platform's own submit handler.
+  document.addEventListener('keydown', (e) => {
+    // Only plain Enter triggers submission; Shift+Enter is a newline.
+    if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.metaKey) return;
+    if (!shadowBlockEnabled) return;
+    if (!isHighBannerActive()) return;
+
+    const target = /** @type {Element} */ (e.target);
+    if (!(target instanceof Element)) return;
+    // Only intercept inputs that DLP is actively monitoring.
+    if (!attached.has(target)) return;
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    showInterceptPopup();
+  }, /* capture = */ true);
+
 })();
