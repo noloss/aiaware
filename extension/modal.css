@@ -1,0 +1,149 @@
+/* modal.css — Styles for the PromptSentinel warning overlay.
+   Scoped with the .ps- prefix to avoid collisions with host-page styles.
+   All values use explicit units / colours so they are immune to the host's
+   CSS custom properties and cascade resets. */
+
+/* ── Overlay (full-screen backdrop) ──────────────────────────────────────── */
+.ps-overlay {
+  all: initial; /* reset any inherited host styles */
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647; /* max z-index — paint above everything */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.55);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Fade in */
+  animation: ps-fade-in 0.12s ease-out both;
+}
+
+@keyframes ps-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Dialog box ──────────────────────────────────────────────────────────── */
+.ps-dialog {
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 32px 28px 24px;
+  max-width: 480px;
+  width: calc(100vw - 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  /* Slide-up entry */
+  animation: ps-slide-up 0.15s ease-out both;
+}
+
+@keyframes ps-slide-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Icon ────────────────────────────────────────────────────────────────── */
+.ps-icon {
+  font-size: 36px;
+  line-height: 1;
+  text-align: center;
+}
+
+/* ── Heading ─────────────────────────────────────────────────────────────── */
+.ps-heading {
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* ── Body copy ───────────────────────────────────────────────────────────── */
+.ps-body {
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #444444;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* ── URL box ─────────────────────────────────────────────────────────────── */
+.ps-url-box {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.ps-url-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888888;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ps-url-value {
+  font-size: 13px;
+  color: #1a1a1a;
+  word-break: break-all;
+  font-family: 'SFMono-Regular', 'Menlo', 'Consolas', monospace;
+}
+
+/* ── Action buttons ──────────────────────────────────────────────────────── */
+.ps-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.ps-btn {
+  all: initial;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.12s ease, opacity 0.12s ease;
+  white-space: nowrap;
+}
+
+.ps-btn:focus-visible {
+  outline: 3px solid #0078d4;
+  outline-offset: 2px;
+}
+
+/* "Sulje" — primary / safe action */
+.ps-btn-close {
+  background-color: #0f62fe;
+  color: #ffffff;
+}
+
+.ps-btn-close:hover {
+  background-color: #0043ce;
+}
+
+/* "Jatka silti" — secondary / risky action */
+.ps-btn-proceed {
+  background-color: transparent;
+  color: #6b6b6b;
+  border: 1px solid #d0d0d0;
+}
+
+.ps-btn-proceed:hover {
+  background-color: #f0f0f0;
+  color: #1a1a1a;
+}
