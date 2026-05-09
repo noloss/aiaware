@@ -36,8 +36,8 @@
         "*://*.claude.ai/*",
         "*://gemini.google.com/*"
       ],
-      "js": ["content.js", "modal.js"],
-      "css": ["modal.css"],
+      "js": ["content.js", "modal.js", "dlp.js"],
+      "css": ["modal.css", "dlp.css"],
       "run_at": "document_idle"
     }
   ],
