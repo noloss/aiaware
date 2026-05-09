@@ -40,8 +40,5 @@
     }
   ],
 
-  "host_permissions": [
-    "*://*.claude.ai/*",
-    "*://gemini.google.com/*"
-  ]
+  "host_permissions": []
 }
