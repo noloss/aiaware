@@ -23,57 +23,89 @@ def git(args: list[str]) -> str:
     return result.stdout.strip()
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--issue", type=int, required=True)
-    args = parser.parse_args()
-
-    issue = get_issue(args.issue)
-    print(f"Working on issue #{issue['number']}: {issue['title']}")
+def run_issue(issue_number: int, feedback: str | None = None) -> int:
+    """Run coder for an issue. Returns PR number."""
+    issue = get_issue(issue_number)
+    print(f"\n[coder] Issue #{issue['number']}: {issue['title']}")
 
     branch = f"feature/issue-{issue['number']}-{slugify(issue['title'])}"
-    git(["checkout", "main"])
-    git(["pull", "origin", "main", "--rebase"])
-    git(["checkout", "-b", branch])
-    print(f"Created branch: {branch}")
+    existing_branch = branch in git(["branch", "--list", branch])
+
+    if feedback and existing_branch:
+        # Retry: checkout existing branch and amend
+        git(["checkout", branch])
+        print(f"[coder] Retrying on existing branch: {branch}")
+    else:
+        git(["checkout", "main"])
+        git(["pull", "origin", "main", "--rebase"])
+        git(["checkout", "-b", branch])
+        print(f"[coder] Created branch: {branch}")
 
     system = (PROMPTS_DIR / "coder.txt").read_text()
     (PROJECT_ROOT / "extension").mkdir(exist_ok=True)
 
-    task = (
-        f"Implement GitHub Issue #{issue['number']}: {issue['title']}\n\n"
-        f"{issue['body']}\n\n"
-        f"Write all necessary files into the extension/ directory. "
-        f"Read existing files before modifying them. "
-        f"Follow conventions in CLAUDE.md."
-    )
+    task = f"Implement GitHub Issue #{issue['number']}: {issue['title']}\n\n{issue['body']}"
+    if feedback:
+        task += (
+            f"\n\n## Reviewer feedback – fix these issues before finishing:\n{feedback}\n\n"
+            f"Read existing files in extension/ first, then fix only what the reviewer flagged."
+        )
+    else:
+        task += (
+            "\n\nWrite all necessary files into the extension/ directory. "
+            "Read existing files before modifying them. "
+            "Follow conventions in CLAUDE.md."
+        )
 
-    print("Running Claude Code coder agent...")
+    print("[coder] Running Claude Code...")
     result = subprocess.run(
         [CLAUDE_BIN, "--print", "--system-prompt", system, task],
         cwd=PROJECT_ROOT
     )
-
     if result.returncode != 0:
-        print("Claude Code exited with error.", file=sys.stderr)
+        print("[coder] Claude Code exited with error.", file=sys.stderr)
         sys.exit(1)
 
     status = git(["status", "--porcelain"])
     if not status:
-        print("No changes written.")
-        sys.exit(0)
+        print("[coder] No changes written – nothing to commit.")
+        # Return existing open PR if there is one
+        return 0
 
     git(["add", "extension/"])
-    git(["commit", "-m", f"feat: {issue['title']} (closes #{issue['number']})"])
+    msg = f"fix: address review feedback (#{issue['number']})" if feedback else \
+          f"feat: {issue['title']} (closes #{issue['number']})"
+    git(["commit", "-m", msg])
     git(["push", "-u", "origin", branch])
 
-    pr_body = (
-        f"Closes #{issue['number']}\n\n"
-        f"## Changes\nImplements: {issue['title']}\n\n"
-        f"## Original Issue\n{issue['body']}"
-    )
-    pr_number = create_pr(title=issue["title"], body=pr_body)
-    print(f"\nOpened PR #{pr_number}: https://github.com/noloss/promptsentinel/pull/{pr_number}")
+    if not feedback:
+        pr_body = (
+            f"Closes #{issue['number']}\n\n"
+            f"## Changes\nImplements: {issue['title']}\n\n"
+            f"## Original Issue\n{issue['body']}"
+        )
+        pr_number = create_pr(title=issue["title"], body=pr_body)
+        print(f"[coder] Opened PR #{pr_number}")
+        return pr_number
+    else:
+        # PR already exists – find its number from gh
+        raw = subprocess.run(
+            ["gh", "pr", "list", "--repo", "noloss/promptsentinel",
+             "--head", branch, "--json", "number", "--jq", ".[0].number"],
+            capture_output=True, text=True
+        ).stdout.strip()
+        pr_number = int(raw) if raw else 0
+        print(f"[coder] Pushed fix to existing PR #{pr_number}")
+        return pr_number
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--issue", type=int, required=True)
+    parser.add_argument("--feedback", type=str, default=None,
+                        help="Reviewer feedback to address in a retry run")
+    args = parser.parse_args()
+    run_issue(args.issue, feedback=args.feedback)
 
 
 if __name__ == "__main__":
