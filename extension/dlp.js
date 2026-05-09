@@ -71,6 +71,17 @@
     jwt:            { re: /eyJ[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,}/, label: 'JWT / Bearer token', severity: 'high' },
 
     // --- PII patterns (warning severity) ------------------------------------
+    // US Social Security Number — format AAA-GG-SSSS.
+    // SSA validation: area (AAA) must not be 000, 666, or 900-999.
+    ssn: {
+      re: /\b\d{3}-\d{2}-\d{4}\b/,
+      label: 'US Social Security Number (SSN)',
+      severity: 'high',
+      validate(match) {
+        const area = parseInt(match.slice(0, 3), 10);
+        return area !== 0 && area !== 666 && area < 900;
+      },
+    },
     email:          { re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/, label: 'sähköpostiosoite' },
     password:       { re: /(?:password|passwd|pwd|salasana)\s*[:=]\s*\S+/i,     label: 'salasana' },
     iban:           { re: /\b[A-Z]{2}\d{2}[A-Z0-9]{4,30}\b/,                   label: 'IBAN-tilinumero' },
