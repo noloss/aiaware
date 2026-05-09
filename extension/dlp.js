@@ -70,7 +70,7 @@
     // JWTs: three base64url segments — only flag in high-entropy contexts.
     jwt:            { re: /eyJ[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,}/, label: 'JWT / Bearer token', severity: 'high' },
 
-    // --- PII patterns (warning severity) ------------------------------------
+    // --- PII patterns -------------------------------------------------------
     // US Social Security Number — format AAA-GG-SSSS.
     // SSA validation: area (AAA) must not be 000, 666, or 900-999.
     ssn: {
@@ -82,9 +82,9 @@
         return area !== 0 && area !== 666 && area < 900;
       },
     },
-    email:          { re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/, label: 'sähköpostiosoite' },
-    password:       { re: /(?:password|passwd|pwd|salasana)\s*[:=]\s*\S+/i,     label: 'salasana' },
-    iban:           { re: /\b[A-Z]{2}\d{2}[A-Z0-9]{4,30}\b/,                   label: 'IBAN-tilinumero' },
+    email:    { re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/, label: 'email address',    severity: 'low' },
+    password: { re: /(?:password|passwd|pwd|salasana)\s*[:=]\s*\S+/i,     label: 'password pattern', severity: 'medium' },
+    iban:     { re: /\b[A-Z]{2}\d{2}[A-Z0-9]{4,30}\b/,                   label: 'IBAN number',      severity: 'low' },
     credit_card: {
       // Match 13–19 digits optionally separated by spaces or dashes.
       re: /\b\d[\d \t\-]{11,20}\d\b/,
@@ -157,11 +157,43 @@
     return el.tagName === 'TEXTAREA' ? el.value : el.innerText || el.textContent;
   }
 
+  // ---------------------------------------------------------------------------
+  // Severity tier helpers.
+  //
+  // Tier ranking (highest → lowest): high > medium > low.
+  // A pattern without an explicit severity defaults to 'low'.
+  // ---------------------------------------------------------------------------
+  const SEVERITY_RANK = { high: 3, medium: 2, low: 1 };
+
+  function topSeverity(hits) {
+    return hits.reduce((best, h) => {
+      const rank = SEVERITY_RANK[h.severity] ?? 1;
+      return rank > (SEVERITY_RANK[best] ?? 1) ? h.severity : best;
+    }, 'low');
+  }
+
+  const TIER_CONFIG = {
+    high: {
+      cssClass: 'ps-high',
+      // Label list appended after the static text for high findings.
+      buildText: (labels) => `🔴 High – sensitive data detected: ${labels.join(', ')}`,
+    },
+    medium: {
+      cssClass: 'ps-medium',
+      buildText: () => '🟠 Medium – potentially sensitive data',
+    },
+    low: {
+      cssClass: '',
+      buildText: () => '🟡 Low – personal data detected',
+    },
+  };
+
   // hits — array of { label, severity } from scanText()
   function showBanner(hits, anchorEl) {
     if (sessionStorage.getItem(DISMISS_KEY)) return;
 
-    const isHigh = hits.some(h => h.severity === 'high');
+    const severity = topSeverity(hits);
+    const tier = TIER_CONFIG[severity] ?? TIER_CONFIG.low;
     const uniqueLabels = [...new Set(hits.map(h => h.label))];
 
     let banner = document.getElementById(BANNER_ID);
@@ -179,15 +211,15 @@
       anchorEl.insertAdjacentElement('afterend', banner);
     }
 
-    // Severity styling — toggle the .ps-high modifier class.
-    banner.classList.toggle('ps-high', isHigh);
+    // Apply exactly one severity modifier class; remove the others.
+    banner.classList.remove('ps-high', 'ps-medium');
+    if (tier.cssClass) banner.classList.add(tier.cssClass);
 
-    // Update text content (keep dismiss button).
+    // Rebuild text content, preserving the dismiss button.
     const dismiss = banner.querySelector('#ps-dlp-dismiss');
     banner.textContent = '';
-    const icon = isHigh ? '🔴' : '⚠️';
     const msg = document.createElement('span');
-    msg.textContent = `${icon} Syötteessäsi saattaa olla arkaluonteista tietoa – havaittu: ${uniqueLabels.join(', ')}`;
+    msg.textContent = tier.buildText(uniqueLabels);
     banner.appendChild(msg);
     banner.appendChild(dismiss);
     banner.style.display = 'flex';
