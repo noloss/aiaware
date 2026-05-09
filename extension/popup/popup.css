@@ -45,7 +45,6 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
   gap: 8px;
 }
 
@@ -55,11 +54,16 @@ main {
   color: #1e1b4b;
 }
 
-.ps-toggle-row input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: #6366f1;
+/* "Always on" badge replaces the checkbox when a feature has no user toggle */
+.ps-badge-on {
+  font-size: 11px;
+  font-weight: 600;
+  color: #166534;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 4px;
+  padding: 1px 7px;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
