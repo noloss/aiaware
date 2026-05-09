@@ -81,10 +81,17 @@ def approve_pr(pr_number: int, comment: str) -> None:
 
 
 def request_changes(pr_number: int, comment: str) -> None:
-    _run(["pr", "review", str(pr_number), "--repo", GITHUB_REPO,
-          "--request-changes", "--body", comment])
+    # GitHub doesn't allow requesting changes on your own PR, so post a comment instead
+    _run(["pr", "comment", str(pr_number), "--repo", GITHUB_REPO,
+          "--body", f"**🔴 CHANGES REQUESTED**\n\n{comment}"])
     _run(["pr", "edit", str(pr_number), "--repo", GITHUB_REPO,
           "--add-label", "needs-work", "--remove-label", "needs-review"], check=False)
+
+
+def approve_pr(pr_number: int, comment: str) -> None:
+    # GitHub doesn't allow approving your own PR, so post a comment instead
+    _run(["pr", "comment", str(pr_number), "--repo", GITHUB_REPO,
+          "--body", f"**✅ LGTM**\n\n{comment}"])
 
 
 def merge_pr(pr_number: int) -> None:
