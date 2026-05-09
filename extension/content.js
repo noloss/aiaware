@@ -7,7 +7,7 @@
 
   // Defence-in-depth: ensure we only activate on the intended hosts even if
   // Chrome injects this script somewhere unexpected during development.
-  const SUPPORTED_HOSTS = ['claude.ai', 'gemini.google.com'];
+  const SUPPORTED_HOSTS = ['claude.ai', 'gemini.google.com', 'chat.openai.com'];
   const host = location.hostname;
   if (!SUPPORTED_HOSTS.some(h => host === h || host.endsWith('.' + h))) return;
 
@@ -32,6 +32,14 @@
     // Gemini — model response containers
     'model-response',
     '.model-response-text',
+    // ChatGPT — assistant turn wrappers
+    '[data-message-author-role="assistant"]',
+    '.agent-turn',
+    // ChatGPT — rendered markdown block inside assistant turns.
+    // Scoped to assistant turns so that any element carrying the generic
+    // `.markdown` utility class in the composer area is never mistaken for
+    // a chat-response container.
+    '[data-message-author-role="assistant"] .markdown',
   ];
 
   // Elements whose subtrees we explicitly want to leave alone.

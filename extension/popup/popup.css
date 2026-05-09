@@ -32,3 +32,40 @@ main {
   color: #4338ca;
   font-size: 13px;
 }
+
+/* ── Settings section ────────────────────────────────────────────────────── */
+
+.ps-settings {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e7ff;
+}
+
+.ps-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  gap: 8px;
+}
+
+.ps-toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e1b4b;
+}
+
+.ps-toggle-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #6366f1;
+  flex-shrink: 0;
+}
+
+.ps-setting-desc {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.5;
+}
