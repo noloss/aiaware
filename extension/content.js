@@ -22,12 +22,21 @@
     // Claude.ai — assistant message wrappers
     '[data-testid="assistant-message"]',
     '.font-claude-message',
-    // Claude.ai — rendered markdown prose block inside an assistant turn
+    // Claude.ai — tighter attribute-based selectors for assistant turns;
+    // preferred over the broad .prose class which can also match user bubbles.
+    '[data-message-author-role="assistant"]',
+    '[data-is-streaming]',
+    // Claude.ai — rendered markdown prose block (broad fallback; kept for
+    // UI versions that lack the above attributes).
     '.prose',
     // Gemini — model response containers
     'model-response',
     '.model-response-text',
   ];
+
+  // Elements whose subtrees we explicitly want to leave alone.
+  // Hoisted to module scope to avoid re-allocating the array on every click.
+  const EXCLUDED_SELECTORS = ['nav', 'header', 'footer', '[role="navigation"]'];
 
   /**
    * Walk up the DOM from `el` and return true if any ancestor matches one of
@@ -38,9 +47,6 @@
    * @returns {boolean}
    */
   function isInsideChatResponse(el) {
-    // Elements whose subtrees we explicitly want to leave alone.
-    const EXCLUDED_SELECTORS = ['nav', 'header', 'footer', '[role="navigation"]'];
-
     let node = el;
     while (node && node !== document.body) {
       // Bail out early if we're inside a nav / header / footer.
@@ -79,8 +85,10 @@
     if (!isInsideChatResponse(anchor)) return;   // Outside chat bubble — ignore.
 
     // Cancel default navigation.
+    // preventDefault() is sufficient — stopPropagation() must NOT be called here
+    // because this listener runs in capture phase and would silently swallow
+    // the event before Claude.ai / Gemini's own UI handlers can react.
     event.preventDefault();
-    event.stopPropagation();
 
     const url = anchor.href;
     console.log('[PromptSentinel] Intercepted link click inside chat response:', url);
