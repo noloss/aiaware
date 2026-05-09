@@ -1,93 +1,97 @@
-# PRD: PromptSentinel – AI Safety & Literacy Extension
-Versio: 1.0
+# PRD: PromptSentinel – DLP Engine
+Versio: 2.0
 
 ## Tavoite
-Opastaa käyttäjiä tunnistamaan AI-vastauksiin liittyviä riskejä (kuten haitallisia linkkejä ja prompt injectionia) simuloitujen "hyökkäysten" ja reaaliaikaisen valvonnan avulla.
+Estää käyttäjiä vahingossa jakamasta arkaluonteista tietoa (API-avaimet, luottokortit, henkilötiedot) AI-chattipalveluihin. Laajennus valvoo syöttökenttää reaaliajassa ja varoittaa ennen kuin tieto lähtee.
+
+Zero-Network-periaate: "PromptSentinel ei koskaan lähetä tietoa verkkoon. Kirjoittamasi teksti ei koskaan poistu koneeltasi."
+
+## Kohderyhmä
+- Kehittäjät jotka copypasteavat koodia ja avaimia chattiin
+- Yrityskäyttäjät jotka käsittelevät henkilötietoja
+- Kaikki jotka käyttävät Claude.ai tai Geminiä päivittäin
 
 ---
 
-## 1. Ongelman kuvaus ja ratkaisu
-**Ongelma:** Käyttäjät luottavat sokeasti LLM-malleihin (Claude, Gemini, ChatGPT). Tämä altistaa heidät phishing-linkeille, tietovuodoille ja epäsuoralle prompt injectionille.
+## Release 1: "Smart Detection Engine"
+**Tavoite:** Luotettava arkaluonteisen datan tunnistus ilman false positiveja.
 
-**Ratkaisu:** Chrome-laajennus, joka toimii "opettavana kerroksena" keskustelun päällä. Se simuloi riskejä turvallisesti ja antaa välitöntä palautetta vaarallisesta toiminnasta.
+### 1.1 Luottokorttien tunnistus (Luhn-algoritmi)
+Kaksi vaihetta:
+- Vaihe A: Regex tunnistaa 13–19 numeron jonon (välilyönnit ja viivat sallittu)
+- Vaihe B: Luhn-algoritmi tarkistaa onko kyseessä oikea korttinumero – jos epäonnistuu, laajennus pysyy hiljaa
 
----
+Hälytystaso: 🔴 High
 
-## 2. Kohderyhmä
-- Yrityskäyttäjät, jotka käsittelevät herkkää tietoa
-- Tietoturvasta kiinnostuneet kuluttajat
-- Oppilaitokset, jotka haluavat opettaa tekoälyn lukutaitoa
+### 1.2 API-avainten tunnistus
+Kaksi menetelmää:
+- Tunnetut prefiksit: `sk-`, `sk-ant-`, `ghp_`, `AKIA`, `AIza`, `Bearer `
+- Shannon-entropian tarkistus: 32–64 merkin satunnainen aakkosnumeerinen jono, jonka entropia > 4.5 bits/char – todennäköisesti API-avain tai token
 
----
+Hälytystaso: 🔴 High
 
-## 3. Julkaisusuunnitelma (Release Roadmap)
+### 1.3 SSN-tunnistus (Social Security Number)
+- Pattern: `\b\d{3}-\d{2}-\d{4}\b`
+- Validointi: Hylätään SSA:n "invalid" alueet (alkaa 000, 666, tai 900–999) – ei false positiveja tavallisille viivatuille numeroille
 
-### Release 1: "The Core Hook" (MVP)
-**Tavoite:** Perusinfra ja linkkien kaappaus.
+Hälytystaso: 🔴 High
 
-**Toiminnallisuus:**
-- Manifest V3 -pohja
-- Content script, joka tunnistaa Claude.ai ja Gemini.google.com chat-ikkunat
-- Linkkien klikkausten seuranta chatin sisällä
-- Yksinkertainen modal-ikkuna (HTML/CSS), joka estää linkin avautumisen ja näyttää varoituksen: "Tämä on opetushetki!"
-- Mahdollisuus jatkaa alkuperäiseen linkkiin
+### 1.4 Kolmiportainen hälytystaso
+- 🟡 Low: Sähköpostiosoite, IBAN
+- 🟠 Medium: Salasanapattern (`password: xxx`), suomalainen henkilötunnus
+- 🔴 High: API-avain, luottokortti, SSN
 
-### Release 2: "Simulation Engine"
-**Tavoite:** Luoda "Hoxhunt-kokemus".
+Varoitusbannerin väri ja teksti muuttuvat tason mukaan.
 
-**Toiminnallisuus:**
-- Arvontamoduuli: Vain tietty % linkeistä (esim. 5 %) laukaisee opetustilan
-- Dashboard-pohja: Laajennuksen ikoni (popup.html) näyttää, kuinka monta "ansaa" käyttäjä on välttänyt
-- Local Storage: Tallennetaan statistiikka (klikkaukset, estetyt) paikallisesti selaimeen
-
-### Release 3: "DLP Lite" (Data Loss Prevention)
-**Tavoite:** Estää käyttäjää vuotamasta tietoa.
-
-**Toiminnallisuus:**
-- Input-kentän monitorointi reaaliajassa
-- Regex-tunnistus: Sähköpostiosoitteet, IBAN-tilinumerot, API-avaimet (esim. sk-...)
-- Soft Warning: Jos teksti sisältää herkkää tietoa, syöttökentän reuna muuttuu keltaiseksi ja pieni tooltip varoittaa tietoturvasta
-
-### Release 4: "Prompt Injection Awareness"
-**Tavoite:** Opastaa monimutkaisemmissa hyökkäyksissä.
-
-**Toiminnallisuus:**
-- Tunnistaa, kun käyttäjä antaa "Summarize this URL" -tyyppisen komennon
-- Näyttää infoviestin: "Varoitus: Ulkopuolinen sisältö voi sisältää piilotettuja ohjeita, jotka kaappaavat tekoälyn."
-- Lisätään lyhyet (30 sekunnin luettavat) "mikro-oppitunnit" injection-tyypeistä
-
-### Release 5: "Gamification & UI Polish"
-**Tavoite:** Sitouttaminen ja ammattimainen ulkoasu.
-
-**Toiminnallisuus:**
-- Safety Score: Algoritmi, joka laskee arvosanan käyttäjän toiminnalle
-- Badges: "Prompt Master", "Security Aware", jne.
-- Dark Mode -tuki ja animaatiot modaleihin
-- Asetussivu, jossa voi säätää simulaatioiden tiheyttä
-
-### Release 6: "Enterprise & Store Ready"
-**Tavoite:** Julkaisu Chrome Web Storeen.
-
-**Toiminnallisuus:**
-- Tietosuojaseloste ja Store-materiaalien valmistelu
-- Koodin optimointi ja bugien korjaus (Claude/Gemini UI-muutosten kestävyys)
-- Valinnainen: Mahdollisuus exportata raportti (esim. IT-osastolle todisteeksi suoritetusta koulutuksesta)
+### Hyväksymiskriteerit
+- `4532015112830366` → Luhn pass → 🔴 banneri
+- `1234567890123456` → Luhn fail → ei banneria
+- `sk-1234567890abcdefghij` → 🔴 banneri
+- `user@example.com` → 🟡 banneri
+- `123-45-6789` → SSN valid → 🔴 banneri
+- `000-12-3456` → SSN invalid range → ei banneria
+- Normaali kirjoittaminen ei hidastu (debounce 300ms)
 
 ---
 
-## 4. Tekninen määrittely
-- **Kieli:** JavaScript (ES6+), HTML5, CSS3
-- **Arkkitehtuuri:**
-  - `background.js`: Hoitaa globaalit tapahtumat (ei pakollinen MVP:ssä)
-  - `content.js`: Lukee DOM-puuta ja injektoi UI-elementit
-  - `popup.html`: Käyttäjän statustiedot
-  - `options.html`: Asetukset
-- **Tietoturva:** Kaikki datan käsittely tapahtuu paikallisesti (ei backendia tässä vaiheessa)
+## Release 2: "Shadow Block"
+**Tavoite:** Estää vahingollinen lähetys 🔴 High-alertin ollessa aktiivinen.
+
+### 2.1 Enter-näppäimen kaappaus
+- Kun 🔴 High-alert on näkyvissä ja käyttäjä painaa Enter (tai klikkaa Send-nappia)
+- Näytetään "Security Intercept" -popup: "Syötteessäsi on arkaluonteista tietoa. Haluatko varmasti lähettää?"
+- Kaksi nappia: "Peruuta" (suositeltava) ja "Lähetä silti"
+- 🟡 ja 🟠 alertit eivät kaappaa Enter-näppäintä – vain soft warning
+
+### Hyväksymiskriteerit
+- Given 🔴 alert aktiivinen, When käyttäjä painaa Enter, Then popup ilmestyy eikä viesti lähde
+- Given popup näkyvissä, When käyttäjä klikkaa "Lähetä silti", Then viesti lähtee normaalisti
+- Given popup näkyvissä, When käyttäjä klikkaa "Peruuta", Then popup sulkeutuu ja teksti jää kenttään
+- Given 🟡 tai 🟠 alert, When käyttäjä painaa Enter, Then viesti lähtee normaalisti (ei kaappausta)
 
 ---
 
-## 5. Hyväksymiskriteerit (Acceptance Criteria)
-- Laajennus ei riko Clauden tai Geminin normaalia käyttöliittymää
-- Linkin klikkaaminen chatin sisällä pysähtyy, jos arpa osuu kohdalle
-- Käyttäjä pääsee aina alkuperäiseen kohteeseen "Ymmärrän" -klikkauksen jälkeen
-- Laajennus ei kerää tai lähetä käyttäjän keskusteluja ulkopuolisille palvelimille
+## Release 3: "Zero-Network & Store Ready"
+**Tavoite:** Selkeä tietosuovaviestintä ja Chrome Web Store -julkaisu.
+
+### 3.1 Zero-Network-brändäys
+- Popup-sivu näyttää: "PromptSentinel on Zero-Network-laajennus. Meillä ei ole palvelinta; kirjoittamasi teksti ei koskaan poistu koneeltasi."
+- manifest.json description: "AI chat DLP guard – Zero-Network, your data never leaves your device."
+- Tietosuojakäytäntö (privacy policy) -teksti Store-listingille
+
+### 3.2 Chrome Web Store -valmistelu
+- Store-kuvaus, kuvakaappaukset, promotional tile
+- Koodin optimointi ja testaus molemmilla alustoilla (Claude.ai, Gemini)
+
+### Hyväksymiskriteerit
+- Popup näyttää Zero-Network-viestin selkokielellä
+- manifest.json description vastaa Store-vaatimuksia (max 132 merkkiä)
+- Laajennus läpäisee Chrome Web Store policy review -tarkistuslistan
+
+---
+
+## Tekninen määrittely
+- Kieli: JavaScript (ES6+), HTML5, CSS3
+- Manifest V3
+- Ei backendia – kaikki logiikka selaimessa
+- Olemassa oleva pohja: `extension/dlp.js` (perustunnistus), `extension/manifest.json`
