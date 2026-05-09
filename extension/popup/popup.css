@@ -73,3 +73,39 @@ main {
   color: #6b7280;
   line-height: 1.5;
 }
+
+/* ── Zero-Network privacy notice ─────────────────────────────────────────── */
+
+.ps-zero-network {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+}
+
+.ps-zero-network-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.ps-zero-network-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ps-zero-network-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #166534;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ps-zero-network-msg {
+  font-size: 11px;
+  color: #15803d;
+  line-height: 1.5;
+}
