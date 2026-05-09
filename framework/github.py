@@ -58,6 +58,7 @@ def get_issue(number: int) -> dict:
 
 def create_pr(title: str, body: str, base: str = "main") -> int:
     """Push current branch and open a PR, return PR number."""
+    ensure_labels(["needs-review", "needs-work", "LGTM"])
     result = _run(["pr", "create", "--repo", GITHUB_REPO,
                    "--title", title, "--body", body,
                    "--base", base, "--label", "needs-review"]).stdout.strip()
