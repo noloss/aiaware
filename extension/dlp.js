@@ -301,22 +301,8 @@
 
   // ---------------------------------------------------------------------------
   // Shadow Block — intercept Enter key submission when a 🔴 High alert is
-  // active and the user has enabled Shadow Block in the popup.
+  // active.  Always enabled; no user toggle required.
   // ---------------------------------------------------------------------------
-
-  let shadowBlockEnabled = false;
-
-  // Load initial setting from storage.
-  chrome.storage.local.get(['shadowBlockEnabled'], ({ shadowBlockEnabled: val }) => {
-    shadowBlockEnabled = !!val;
-  });
-
-  // Stay in sync when the popup toggles the setting.
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && 'shadowBlockEnabled' in changes) {
-      shadowBlockEnabled = !!changes.shadowBlockEnabled.newValue;
-    }
-  });
 
   /** Returns true when the DLP banner is currently showing a High-severity hit. */
   function isHighBannerActive() {
@@ -433,7 +419,6 @@
   document.addEventListener('keydown', (e) => {
     // Only plain Enter triggers submission; Shift+Enter is a newline.
     if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.metaKey) return;
-    if (!shadowBlockEnabled) return;
     if (!isHighBannerActive()) return;
 
     const target = /** @type {Element} */ (e.target);
