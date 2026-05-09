@@ -200,6 +200,7 @@
     if (!banner) {
       banner = document.createElement('div');
       banner.id = BANNER_ID;
+      banner.dataset.labels = '';
       const btn = document.createElement('button');
       btn.id = 'ps-dlp-dismiss';
       btn.textContent = '✕';
@@ -222,6 +223,7 @@
     msg.textContent = tier.buildText(uniqueLabels);
     banner.appendChild(msg);
     banner.appendChild(dismiss);
+    banner.dataset.labels = uniqueLabels.join(', ');
     banner.style.display = 'flex';
   }
 
@@ -385,7 +387,11 @@
     const body = document.createElement('p');
     body.className = 'ps-body';
     body.textContent =
-      'Your message appears to contain sensitive data. Are you sure you want to send it?';
+      (() => {
+        const labels = document.getElementById(BANNER_ID)?.dataset.labels;
+        const detail = labels ? `: ${labels}` : '';
+        return `Your message appears to contain sensitive data${detail}. Are you sure you want to send it?`;
+      })();
 
     const actions = document.createElement('div');
     actions.className = 'ps-actions';
