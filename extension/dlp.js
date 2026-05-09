@@ -271,8 +271,14 @@
   }
 
   const INPUT_SELECTORS = [
+    // ChatGPT — ProseMirror contenteditable div (newer UI, ~2024+).
+    // id="prompt-textarea" is stable; data-placeholder is a secondary anchor.
+    '#prompt-textarea',
+    'div[contenteditable="true"][data-placeholder]',
+    // Generic contenteditable textboxes (Claude.ai, older ChatGPT versions).
     'div[contenteditable="true"][role="textbox"]',
     'div[contenteditable="true"]',
+    // Claude.ai rich-textarea wrapper and plain textareas (Gemini, others).
     'rich-textarea textarea',
     'textarea',
   ];
@@ -327,7 +333,10 @@
   // selectors match, clickPlatformSubmit() does nothing and the user can
   // submit manually — safer than clicking an arbitrary button on the page.
   const SUBMIT_SELECTORS = [
-    // ChatGPT
+    // ChatGPT — data-testid is correct as of 2025 but OpenAI changes test-ids
+    // frequently. If this stops working, inspect the send button for a new
+    // data-testid value or a stable aria-label, and update accordingly.
+    // TODO: add aria-label fallback once OpenAI ships a localised label.
     'button[data-testid="send-button"]',
     // Claude.ai
     'button[aria-label="Send Message"]',
