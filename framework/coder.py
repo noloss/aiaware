@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from framework.config import CLAUDE_BIN, PROJECT_ROOT, PROMPTS_DIR
+from framework.config import CLAUDE_BIN, GH_BIN, GITHUB_REPO, PROJECT_ROOT, PROMPTS_DIR
 from framework.github import create_pr, get_issue
 
 
@@ -91,7 +91,7 @@ def run_issue(issue_number: int, feedback: str | None = None) -> int:
     else:
         # PR already exists – find its number from gh
         raw = subprocess.run(
-            ["gh", "pr", "list", "--repo", "noloss/promptsentinel",
+            [GH_BIN, "pr", "list", "--repo", GITHUB_REPO,
              "--head", branch, "--json", "number", "--jq", ".[0].number"],
             capture_output=True, text=True
         ).stdout.strip()
