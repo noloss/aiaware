@@ -89,12 +89,12 @@
 
     const closeBtn = document.createElement('button');
     closeBtn.className = 'ps-btn ps-btn-close';
-    closeBtn.textContent = 'Sulje';
+    closeBtn.textContent = 'Close';
     closeBtn.addEventListener('click', closeModal);
 
     const proceedBtn = document.createElement('button');
     proceedBtn.className = 'ps-btn ps-btn-proceed';
-    proceedBtn.textContent = 'Ymmärrän \u2013 jatka';
+    proceedBtn.textContent = 'I understand – continue';
     proceedBtn.addEventListener('click', () => {
       // Ask the background service worker to open the URL.
       // chrome.tabs.create() is not available in content scripts, so we

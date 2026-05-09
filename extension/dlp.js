@@ -88,7 +88,7 @@
     credit_card: {
       // Match 13–19 digits optionally separated by spaces or dashes.
       re: /\b\d[\d \t\-]{11,20}\d\b/,
-      label: 'luottokorttinumero',
+      label: 'credit card number',
       severity: 'high',
       validate(match) {
         const digits = match.replace(/[\s\-]/g, '');
@@ -380,24 +380,24 @@
     const heading = document.createElement('h2');
     heading.id = 'ps-intercept-title';
     heading.className = 'ps-heading';
-    heading.textContent = 'Tietoturvavaroitus';
+    heading.textContent = 'Security Warning';
 
     const body = document.createElement('p');
     body.className = 'ps-body';
     body.textContent =
-      'Syötteessäsi on arkaluonteista tietoa. Haluatko varmasti lähettää?';
+      'Your message appears to contain sensitive data. Are you sure you want to send it?';
 
     const actions = document.createElement('div');
     actions.className = 'ps-actions';
 
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'ps-btn ps-btn-close';
-    cancelBtn.textContent = 'Peruuta';
+    cancelBtn.textContent = 'Cancel';
     cancelBtn.addEventListener('click', closeIntercept);
 
     const sendBtn = document.createElement('button');
     sendBtn.className = 'ps-btn ps-btn-proceed';
-    sendBtn.textContent = 'Lähetä silti';
+    sendBtn.textContent = 'Send anyway';
     sendBtn.addEventListener('click', () => {
       closeIntercept();
       clickPlatformSubmit();
