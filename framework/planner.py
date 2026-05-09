@@ -60,8 +60,8 @@ def main():
     for issue in issues:
         ms_title = issue["milestone"]
         if ms_title not in milestone_cache:
-            milestone_cache[ms_title] = ensure_milestone(ms_title)
-        ms_number = milestone_cache[ms_title]
+            ensure_milestone(ms_title)
+            milestone_cache[ms_title] = True
 
         criteria_lines = []
         for ac in issue.get("acceptance_criteria", []):
@@ -81,7 +81,7 @@ def main():
             title=issue["title"],
             body=body,
             labels=issue.get("labels", ["ready"]),
-            milestone_number=ms_number,
+            milestone_title=ms_title,
         )
         print(f"  Created issue #{number}: {issue['title']}")
         created.append({"number": number, **issue})

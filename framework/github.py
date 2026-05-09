@@ -30,26 +30,21 @@ def ensure_labels(labels: list[str]) -> None:
             _run(["label", "create", label, "--repo", GITHUB_REPO, "--color", color], check=False)
 
 
-def ensure_milestone(title: str) -> int:
-    """Create milestone if missing, return its number."""
+def ensure_milestone(title: str) -> None:
+    """Create milestone if it doesn't already exist."""
     raw = _run(["api", f"repos/{GITHUB_REPO}/milestones", "--jq", ".[].title"]).stdout
-    if title in raw.splitlines():
-        raw2 = _run(["api", f"repos/{GITHUB_REPO}/milestones"]).stdout
-        for m in json.loads(raw2):
-            if m["title"] == title:
-                return m["number"]
-    result = _run(["api", f"repos/{GITHUB_REPO}/milestones", "--method", "POST",
-                   "-f", f"title={title}", "-f", "state=open"]).stdout
-    return json.loads(result)["number"]
+    if title not in raw.splitlines():
+        _run(["api", f"repos/{GITHUB_REPO}/milestones", "--method", "POST",
+              "-f", f"title={title}", "-f", "state=open"])
 
 
-def create_issue(title: str, body: str, labels: list[str], milestone_number: int) -> int:
+def create_issue(title: str, body: str, labels: list[str], milestone_title: str) -> int:
     """Create a GitHub issue and return its number."""
     args = ["issue", "create", "--repo", GITHUB_REPO,
             "--title", title, "--body", body]
     for label in labels:
         args += ["--label", label]
-    args += ["--milestone", str(milestone_number)]
+    args += ["--milestone", milestone_title]
     result = _run(args).stdout.strip()
     # result is the issue URL, extract number from end
     return int(result.rstrip("/").split("/")[-1])
