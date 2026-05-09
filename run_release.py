@@ -7,23 +7,27 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from framework.coder import run_issue
-from framework.github import find_open_pr_for_issue, is_issue_done
+from framework.github import find_open_pr_for_issue, is_issue_done, _run
 from framework.reviewer import review_pr
 
 MAX_RETRIES = 3
 
 
-def run_release(release_number: int) -> None:
-    tasks_path = Path("tasks.json")
-    if not tasks_path.exists():
-        print("tasks.json not found – run planner first.", file=sys.stderr)
-        sys.exit(1)
+def fetch_release_issues(release_number: int) -> list[dict]:
+    """Fetch open+closed issues from GitHub with the release-N label."""
+    label = f"release-{release_number}"
+    raw = _run(["issue", "list", "--repo", "noloss/promptsentinel",
+                "--label", label, "--state", "all",
+                "--json", "number,title", "--limit", "100"]).stdout
+    issues = json.loads(raw)
+    return sorted(issues, key=lambda x: x["number"])
 
-    tasks = json.loads(tasks_path.read_text())
-    release_tasks = [t for t in tasks if t["release"] == release_number]
+
+def run_release(release_number: int) -> None:
+    release_tasks = fetch_release_issues(release_number)
 
     if not release_tasks:
-        print(f"No tasks found for release {release_number}.", file=sys.stderr)
+        print(f"No issues found with label 'release-{release_number}'.", file=sys.stderr)
         sys.exit(1)
 
     print(f"\n=== Release {release_number}: {len(release_tasks)} issues ===\n")
