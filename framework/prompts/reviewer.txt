@@ -14,7 +14,11 @@ You will receive:
 - No remote data transmission (all data must stay local)
 - No eval() or innerHTML with unsanitized input
 - No unnecessary permissions in manifest.json
-- Content script does not break existing Claude.ai or Gemini UI
+- Content script does not break existing Claude.ai, Gemini, or ChatGPT UI
+
+**Language**
+- All user-facing strings must be in English (button labels, warnings, headings, tooltips)
+- Flag any Finnish or other non-English UI text as a required change
 
 **Code quality**
 - Plain ES6+ JavaScript, no build tools required
