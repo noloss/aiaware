@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PromptSentinel",
   "version": "0.1.0",
-  "description": "Learn to spot AI prompt-injection and security risks in real time.",
+  "description": "AI chat DLP guard \u2013 Zero-Network, your data never leaves your device.",
 
   "icons": {
     "16":  "icons/icon16.png",
