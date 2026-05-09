@@ -40,3 +40,14 @@
 #ps-dlp-dismiss:hover {
   opacity: 1;
 }
+
+/* High-severity variant — shown for patterns like credit card numbers. */
+#ps-dlp-banner.ps-high {
+  background: #FEE2E2;
+  color: #991B1B;
+  border-color: #EF4444;
+}
+
+#ps-dlp-banner.ps-high #ps-dlp-dismiss {
+  color: #991B1B;
+}
