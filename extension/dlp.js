@@ -99,7 +99,7 @@
   // ---------------------------------------------------------------------------
   const ENTROPY_THRESHOLD = 4.5;
   const ENTROPY_MIN_LEN   = 20;
-  const TOKEN_RE = /[a-zA-Z0-9+/]{20,}/g; // base64-safe char set
+  const TOKEN_RE = new RegExp(`[a-zA-Z0-9+/]{${ENTROPY_MIN_LEN},}`, 'g'); // base64-safe char set
 
   function scanEntropy(text) {
     const hits = [];
