@@ -94,7 +94,7 @@
 
     const proceedBtn = document.createElement('button');
     proceedBtn.className = 'ps-btn ps-btn-proceed';
-    proceedBtn.textContent = 'Jatka silti';
+    proceedBtn.textContent = 'Ymmärrän \u2013 jatka';
     proceedBtn.addEventListener('click', () => {
       closeModal();
       // Open in a new tab so the user makes a deliberate choice.
