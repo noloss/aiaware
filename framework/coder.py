@@ -59,7 +59,8 @@ def run_issue(issue_number: int, feedback: str | None = None) -> int:
 
     print("[coder] Running Claude Code...")
     result = subprocess.run(
-        [CLAUDE_BIN, "--print", "--system-prompt", system, task],
+        [CLAUDE_BIN, "--print", "--dangerously-skip-permissions",
+         "--system-prompt", system, task],
         cwd=PROJECT_ROOT
     )
     if result.returncode != 0:
