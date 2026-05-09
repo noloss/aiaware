@@ -35,8 +35,11 @@
     // ChatGPT — assistant turn wrappers
     '[data-message-author-role="assistant"]',
     '.agent-turn',
-    // ChatGPT — rendered markdown block inside assistant turns
-    '.markdown',
+    // ChatGPT — rendered markdown block inside assistant turns.
+    // Scoped to assistant turns so that any element carrying the generic
+    // `.markdown` utility class in the composer area is never mistaken for
+    // a chat-response container.
+    '[data-message-author-role="assistant"] .markdown',
   ];
 
   // Elements whose subtrees we explicitly want to leave alone.

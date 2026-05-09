@@ -323,6 +323,9 @@
   }
 
   // Submit-button selectors tried in order across all supported platforms.
+  // Deliberately no generic fallbacks: if none of the platform-specific
+  // selectors match, clickPlatformSubmit() does nothing and the user can
+  // submit manually — safer than clicking an arbitrary button on the page.
   const SUBMIT_SELECTORS = [
     // ChatGPT
     'button[data-testid="send-button"]',
@@ -331,9 +334,6 @@
     'button[aria-label="Send message"]',
     // Gemini
     'button.send-button',
-    // Generic fallback
-    'button[aria-label*="Send"]',
-    'button[type="submit"]',
   ];
 
   /** Click the platform's native send / submit button. */
