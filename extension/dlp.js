@@ -331,11 +331,17 @@
     'button.send-button',
   ];
 
+  // Flag that allows the programmatic re-click (from "Send anyway") to bypass
+  // the send-button click interceptor below.  Set to true immediately before
+  // btn.click() and reset inside the interceptor on the very next event.
+  let _bypassSendClick = false;
+
   /** Click the platform's native send / submit button. */
   function clickPlatformSubmit() {
     for (const sel of SUBMIT_SELECTORS) {
       const btn = document.querySelector(sel);
       if (btn) {
+        _bypassSendClick = true;
         btn.click();
         return;
       }
@@ -423,6 +429,38 @@
     if (!(target instanceof Element)) return;
     // Only intercept inputs that DLP is actively monitoring.
     if (!attached.has(target)) return;
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    showInterceptPopup();
+  }, /* capture = */ true);
+
+  // ---------------------------------------------------------------------------
+  // Send-button click intercept — mirrors the Enter-key intercept above so
+  // that mouse-driven submission is also protected when a 🔴 High alert is
+  // active.
+  //
+  // Runs in capture phase so it fires before any platform click handler.
+  // When the user confirms "Send anyway", clickPlatformSubmit() sets
+  // _bypassSendClick = true so the programmatic re-click passes through.
+  // ---------------------------------------------------------------------------
+  document.addEventListener('click', (e) => {
+    // Allow the programmatic re-click from "Send anyway" to pass through.
+    if (_bypassSendClick) {
+      _bypassSendClick = false;
+      return;
+    }
+
+    if (!isHighBannerActive()) return;
+
+    const target = /** @type {Element} */ (e.target);
+    if (!(target instanceof Element)) return;
+
+    // Check whether the click landed on (or inside) a recognised send button.
+    const isSendButton = SUBMIT_SELECTORS.some(sel => {
+      try { return target.closest(sel) !== null; } catch { return false; }
+    });
+    if (!isSendButton) return;
 
     e.preventDefault();
     e.stopImmediatePropagation();
