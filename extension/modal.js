@@ -96,9 +96,12 @@
     proceedBtn.className = 'ps-btn ps-btn-proceed';
     proceedBtn.textContent = 'Ymmärrän \u2013 jatka';
     proceedBtn.addEventListener('click', () => {
+      // Ask the background service worker to open the URL.
+      // chrome.tabs.create() is not available in content scripts, so we
+      // delegate via messaging. window.open() is intentionally avoided
+      // because page-level CSP can block it from a content script.
+      chrome.runtime.sendMessage({ type: 'openTab', url });
       closeModal();
-      // Open in a new tab so the user makes a deliberate choice.
-      window.open(url, '_blank', 'noopener,noreferrer');
     });
 
     actions.append(closeBtn, proceedBtn);
