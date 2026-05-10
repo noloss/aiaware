@@ -419,15 +419,33 @@
     }, DEBOUNCE_MS));
   }
 
+  // ---------------------------------------------------------------------------
+  // Structured logger for DLP diagnostics.
+  // ---------------------------------------------------------------------------
+  const DLP_LOG_CTX = { extension: 'AI Aware', module: 'dlp' };
+
   const attached = new WeakSet();
+  // Plain counter so we can detect "nothing was ever attached" without iterating
+  // a WeakSet (which does not expose its size).
+  let attachedCount = 0;
 
   function attachToInput(el) {
     if (attached.has(el)) return;
     attached.add(el);
-    el.addEventListener('input', () => onInput(el));
+    attachedCount++;
+
+    el.addEventListener('input', () => {
+      try { onInput(el); } catch (err) {
+        console.error('[AI Aware] DLP input handler error:', err, DLP_LOG_CTX);
+      }
+    });
     el.addEventListener('paste', () => {
       // paste fires before input, wait one tick
-      setTimeout(() => onInput(el), 0);
+      setTimeout(() => {
+        try { onInput(el); } catch (err) {
+          console.error('[AI Aware] DLP paste handler error:', err, DLP_LOG_CTX);
+        }
+      }, 0);
     });
   }
 
@@ -445,19 +463,56 @@
 
   function findAndAttach() {
     for (const sel of INPUT_SELECTORS) {
-      const els = document.querySelectorAll(sel);
+      let els;
+      try {
+        els = document.querySelectorAll(sel);
+      } catch (err) {
+        // An invalid CSS selector (e.g. after a future refactor) must never
+        // propagate — log it and skip this selector silently.
+        console.warn(
+          '[AI Aware] DLP: querySelectorAll failed for selector — skipping.',
+          { ...DLP_LOG_CTX, selector: sel, error: err.message },
+        );
+        continue;
+      }
       for (const el of els) {
         if (el.closest('#aa-dlp-banner')) continue;
-        attachToInput(el);
+        try {
+          attachToInput(el);
+        } catch (err) {
+          console.error('[AI Aware] DLP: attachToInput failed:', err, DLP_LOG_CTX);
+        }
       }
     }
   }
 
-  // Observe DOM for late-loading input fields (Gemini SPA)
-  const observer = new MutationObserver(findAndAttach);
+  // Observe DOM for late-loading input fields (Gemini SPA).
+  // The callback is wrapped in try/catch so a crash here never silently kills
+  // the observer — MutationObserver swallows exceptions after the first one.
+  const observer = new MutationObserver(() => {
+    try { findAndAttach(); } catch (err) {
+      console.error('[AI Aware] DLP: MutationObserver callback error:', err, DLP_LOG_CTX);
+    }
+  });
   observer.observe(document.body, { childList: true, subtree: true });
 
   findAndAttach();
+
+  // ---------------------------------------------------------------------------
+  // Diagnostic — warn if no input elements were found after SPA hydration.
+  // Runs 3 s after init; by then all three platforms have rendered their
+  // composer areas.  A zero count means our INPUT_SELECTORS no longer match
+  // the page structure and DLP monitoring is inactive.
+  // ---------------------------------------------------------------------------
+  setTimeout(() => {
+    if (attachedCount === 0) {
+      console.warn(
+        '[AI Aware] DLP: no input fields found — UI may have changed. ' +
+        'DLP monitoring is inactive.',
+        { ...DLP_LOG_CTX, selectors: INPUT_SELECTORS },
+      );
+    }
+  }, 3000);
 
   // ---------------------------------------------------------------------------
   // Shadow Block — intercept Enter key submission when a 🔴 High alert is

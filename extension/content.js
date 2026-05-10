@@ -14,6 +14,19 @@
   console.log('[AI Aware] active on', host);
 
   // ---------------------------------------------------------------------------
+  // Structured logger — all diagnostic messages share a common prefix and
+  // an 'aiAware' context object so they are easy to filter in DevTools.
+  // ---------------------------------------------------------------------------
+  const LOG_CTX = { extension: 'AI Aware', host };
+
+  function warnSelectors(selectors, context) {
+    console.warn(
+      '[AI Aware] No elements matched — UI may have changed.',
+      { ...LOG_CTX, context, selectors },
+    );
+  }
+
+  // ---------------------------------------------------------------------------
   // Chat-response container selectors (per host).
   // A link is only intercepted when it lives inside one of these containers.
   // Add more selectors here as the host UIs evolve — order is irrelevant.
@@ -88,25 +101,48 @@
   // in-page handlers and before the browser starts navigation.
   // ---------------------------------------------------------------------------
   document.addEventListener('click', (event) => {
-    const anchor = closestAnchor(/** @type {Element} */ (event.target));
-    if (!anchor) return;                          // Not a link click — ignore.
-    if (!isInsideChatResponse(anchor)) return;   // Outside chat bubble — ignore.
+    try {
+      const anchor = closestAnchor(/** @type {Element} */ (event.target));
+      if (!anchor) return;                          // Not a link click — ignore.
+      if (!isInsideChatResponse(anchor)) return;   // Outside chat bubble — ignore.
 
-    // Cancel default navigation.
-    // preventDefault() is sufficient — stopPropagation() must NOT be called here
-    // because this listener runs in capture phase and would silently swallow
-    // the event before Claude.ai / Gemini's own UI handlers can react.
-    event.preventDefault();
+      // Cancel default navigation.
+      // preventDefault() is sufficient — stopPropagation() must NOT be called here
+      // because this listener runs in capture phase and would silently swallow
+      // the event before Claude.ai / Gemini's own UI handlers can react.
+      event.preventDefault();
 
-    const url = anchor.href;
-    console.log('[AI Aware] Intercepted link click inside chat response:', url);
+      const url = anchor.href;
+      console.log('[AI Aware] Intercepted link click inside chat response:', url);
 
-    // Dispatch a custom event so other modules (safety check, warning modal,
-    // etc.) can react without coupling to this listener directly.
-    document.dispatchEvent(new CustomEvent('aiaware:linkclick', {
-      detail: { url, anchor },
-      bubbles: false,
-    }));
+      // Dispatch a custom event so other modules (safety check, warning modal,
+      // etc.) can react without coupling to this listener directly.
+      document.dispatchEvent(new CustomEvent('aiaware:linkclick', {
+        detail: { url, anchor },
+        bubbles: false,
+      }));
+    } catch (err) {
+      // An unexpected error inside our listener must never propagate as an
+      // uncaught exception — that would interfere with the host page's own
+      // click handlers running in the same capture phase.
+      console.error('[AI Aware] Unexpected error in click handler:', err, LOG_CTX);
+    }
   }, /* capture = */ true);
+
+  // ---------------------------------------------------------------------------
+  // Diagnostic — check that at least one chat-response container is present.
+  // Deferred by 3 s so SPA frameworks have time to render their initial UI
+  // before we evaluate the selectors.  Logs a structured warning (never throws)
+  // if the page has no recognisable chat containers, which would indicate that
+  // the host platform's DOM structure has changed in an incompatible way.
+  // ---------------------------------------------------------------------------
+  setTimeout(() => {
+    const anyMatch = CHAT_RESPONSE_SELECTORS.some(sel => {
+      try { return document.querySelector(sel) !== null; } catch { return false; }
+    });
+    if (!anyMatch) {
+      warnSelectors(CHAT_RESPONSE_SELECTORS, 'chat-response containers');
+    }
+  }, 3000);
 
 })();
