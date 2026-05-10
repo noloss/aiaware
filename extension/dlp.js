@@ -37,6 +37,87 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Masking helpers.
+  //
+  // Each function takes the matched string and returns a masked replacement of
+  // identical length (where practical), preserving surrounding text positions.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Mask an email address.
+   * john.doe@example.com  →  jo***@ex***.com
+   * Keep first 2 chars of local part, first 2 chars of domain name, full TLD.
+   */
+  function maskEmail(match) {
+    const atIdx = match.indexOf('@');
+    if (atIdx < 0) return match;
+    const local = match.slice(0, atIdx);
+    const domain = match.slice(atIdx + 1);
+    const dotIdx = domain.lastIndexOf('.');
+    const domainName = dotIdx >= 0 ? domain.slice(0, dotIdx) : domain;
+    const tld = dotIdx >= 0 ? domain.slice(dotIdx) : '';
+    return local.slice(0, 2) + '***' + '@' + domainName.slice(0, 2) + '***' + tld;
+  }
+
+  /**
+   * Mask a credit card number.
+   * 4532 0151 1283 0366  →  4532 **** **** 0366
+   * Keep first and last digit group; mask all middle groups.
+   * Preserves the original separator character (space or dash).
+   */
+  function maskCreditCard(match) {
+    const sepMatch = match.match(/[ \-]/);
+    if (sepMatch) {
+      const sep = sepMatch[0];
+      const parts = match.split(sep);
+      const n = parts.length;
+      const masked = parts.map((part, i) =>
+        (i === 0 || i === n - 1) ? part : '*'.repeat(part.length)
+      );
+      return masked.join(sep);
+    }
+    // No separator: keep first 4 and last 4 digits, mask the rest.
+    const digits = match.replace(/\D/g, '');
+    if (digits.length <= 8) return '*'.repeat(match.length);
+    return digits.slice(0, 4) + '*'.repeat(digits.length - 8) + digits.slice(-4);
+  }
+
+  /**
+   * Factory for API key masking.
+   * Keeps the first `prefixLen + 2` characters; masks the remainder with '*'.
+   *
+   * Example (prefixLen = 3 for "sk-"):
+   *   sk-1234567890abcdefghij  →  sk-12******************
+   */
+  function apiKeyMask(prefixLen) {
+    return (match) => {
+      const keep = prefixLen + 2;
+      return match.slice(0, keep) + '*'.repeat(Math.max(0, match.length - keep));
+    };
+  }
+
+  /**
+   * Mask a US Social Security Number.
+   * 123-45-6789  →  123-**-****
+   * Keep area segment; mask group and serial.
+   */
+  function maskSsn(match) {
+    const parts = match.split('-');
+    if (parts.length !== 3) return '***-**-****';
+    return parts[0] + '-**-****';
+  }
+
+  /**
+   * Mask an IBAN.
+   * GB29NWBK60161331926819  →  GB29******************19
+   * Keep first 4 characters (country + check digits) and last 2.
+   */
+  function maskIban(match) {
+    if (match.length <= 6) return match;
+    return match.slice(0, 4) + '*'.repeat(match.length - 6) + match.slice(-2);
+  }
+
+  // ---------------------------------------------------------------------------
   // Pattern registry.
   //
   // Each entry may include:
@@ -44,35 +125,34 @@
   //   label    – Human-readable label shown in the banner (required)
   //   severity – 'warning' (yellow, default) | 'high' (red)
   //   validate – Optional function(matchString) => boolean for extra validation.
-  //              When present, at least one regex match must pass validation for
-  //              the pattern to register a hit.
+  //              When present, only validated matches are reported.
+  //   maskFn   – Optional function(matchString) => maskedString.
+  //              Used by maskText() to replace a detected match in-place.
   // ---------------------------------------------------------------------------
   const PATTERNS = {
     // --- Known-prefix API keys / tokens (all high severity) -----------------
-    anthropic_key:  { re: /sk-ant-[a-zA-Z0-9\-]{20,}/,  label: 'Anthropic API key',    severity: 'high' },
-    openai_key:     { re: /\bsk-[a-zA-Z0-9]{20,}/,       label: 'OpenAI API key',        severity: 'high' },
-    openai_proj:    { re: /\bsk-proj-[a-zA-Z0-9\-]{20,}/,label: 'OpenAI project key',    severity: 'high' },
-    google_key:     { re: /AIza[0-9A-Za-z_\-]{35}/,       label: 'Google API key',        severity: 'high' },
-    github_pat:     { re: /ghp_[a-zA-Z0-9]{36}/,          label: 'GitHub PAT',            severity: 'high' },
-    github_oauth:   { re: /gho_[a-zA-Z0-9]{36}/,          label: 'GitHub OAuth token',    severity: 'high' },
-    github_server:  { re: /ghs_[a-zA-Z0-9]{36}/,          label: 'GitHub server token',   severity: 'high' },
-    github_refresh: { re: /ghr_[a-zA-Z0-9]{76}/,          label: 'GitHub refresh token',  severity: 'high' },
-    github_user:    { re: /ghu_[a-zA-Z0-9]{36}/,          label: 'GitHub user token',     severity: 'high' },
-    gitlab_pat:     { re: /glpat-[a-zA-Z0-9\-_]{20,}/,   label: 'GitLab PAT',            severity: 'high' },
-    aws_key:        { re: /AKIA[0-9A-Z]{16}/,              label: 'AWS access key',        severity: 'high' },
-    slack_bot:      { re: /xoxb-[0-9A-Za-z\-]{24,}/,     label: 'Slack bot token',       severity: 'high' },
-    slack_user:     { re: /xoxp-[0-9A-Za-z\-]{24,}/,     label: 'Slack user token',      severity: 'high' },
-    slack_app:      { re: /xoxa-[0-9A-Za-z\-]{24,}/,     label: 'Slack app token',       severity: 'high' },
-    slack_config:   { re: /xoxs-[0-9A-Za-z\-]{24,}/,     label: 'Slack config token',    severity: 'high' },
-    stripe_live:    { re: /sk_live_[0-9a-zA-Z]{24,}/,    label: 'Stripe live secret key', severity: 'high' },
-    stripe_test:    { re: /sk_test_[0-9a-zA-Z]{24,}/,    label: 'Stripe test secret key', severity: 'high' },
-    npm_token:      { re: /\bnpm_[a-zA-Z0-9]{36}/,        label: 'npm access token',      severity: 'high' },
-    // JWTs: three base64url segments — only flag in high-entropy contexts.
-    jwt:            { re: /eyJ[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,}/, label: 'JWT / Bearer token', severity: 'high' },
+    anthropic_key:  { re: /sk-ant-[a-zA-Z0-9\-]{20,}/,   label: 'Anthropic API key',        severity: 'high', maskFn: apiKeyMask(7)  },
+    openai_key:     { re: /\bsk-[a-zA-Z0-9]{20,}/,         label: 'OpenAI API key',            severity: 'high', maskFn: apiKeyMask(3)  },
+    openai_proj:    { re: /\bsk-proj-[a-zA-Z0-9\-]{20,}/, label: 'OpenAI project key',         severity: 'high', maskFn: apiKeyMask(8)  },
+    google_key:     { re: /AIza[0-9A-Za-z_\-]{35}/,        label: 'Google API key',             severity: 'high', maskFn: apiKeyMask(4)  },
+    github_pat:     { re: /ghp_[a-zA-Z0-9]{36}/,           label: 'GitHub PAT',                 severity: 'high', maskFn: apiKeyMask(4)  },
+    github_oauth:   { re: /gho_[a-zA-Z0-9]{36}/,           label: 'GitHub OAuth token',         severity: 'high', maskFn: apiKeyMask(4)  },
+    github_server:  { re: /ghs_[a-zA-Z0-9]{36}/,           label: 'GitHub server token',        severity: 'high', maskFn: apiKeyMask(4)  },
+    github_refresh: { re: /ghr_[a-zA-Z0-9]{76}/,           label: 'GitHub refresh token',       severity: 'high', maskFn: apiKeyMask(4)  },
+    github_user:    { re: /ghu_[a-zA-Z0-9]{36}/,           label: 'GitHub user token',          severity: 'high', maskFn: apiKeyMask(4)  },
+    gitlab_pat:     { re: /glpat-[a-zA-Z0-9\-_]{20,}/,    label: 'GitLab PAT',                 severity: 'high', maskFn: apiKeyMask(6)  },
+    aws_key:        { re: /AKIA[0-9A-Z]{16}/,               label: 'AWS access key',             severity: 'high', maskFn: apiKeyMask(4)  },
+    slack_bot:      { re: /xoxb-[0-9A-Za-z\-]{24,}/,      label: 'Slack bot token',            severity: 'high', maskFn: apiKeyMask(5)  },
+    slack_user:     { re: /xoxp-[0-9A-Za-z\-]{24,}/,      label: 'Slack user token',           severity: 'high', maskFn: apiKeyMask(5)  },
+    slack_app:      { re: /xoxa-[0-9A-Za-z\-]{24,}/,      label: 'Slack app token',            severity: 'high', maskFn: apiKeyMask(5)  },
+    slack_config:   { re: /xoxs-[0-9A-Za-z\-]{24,}/,      label: 'Slack config token',         severity: 'high', maskFn: apiKeyMask(5)  },
+    stripe_live:    { re: /sk_live_[0-9a-zA-Z]{24,}/,      label: 'Stripe live secret key',     severity: 'high', maskFn: apiKeyMask(8)  },
+    stripe_test:    { re: /sk_test_[0-9a-zA-Z]{24,}/,      label: 'Stripe test secret key',     severity: 'high', maskFn: apiKeyMask(8)  },
+    npm_token:      { re: /\bnpm_[a-zA-Z0-9]{36}/,         label: 'npm access token',           severity: 'high', maskFn: apiKeyMask(4)  },
+    // JWTs: three base64url segments.
+    jwt:            { re: /eyJ[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,}\.[a-zA-Z0-9_\-]{10,}/, label: 'JWT / Bearer token', severity: 'high', maskFn: apiKeyMask(3) },
 
     // --- PII patterns -------------------------------------------------------
-    // US Social Security Number — format AAA-GG-SSSS.
-    // SSA validation: area (AAA) must not be 000, 666, or 900-999.
     ssn: {
       re: /\b\d{3}-\d{2}-\d{4}\b/,
       label: 'US Social Security Number (SSN)',
@@ -81,10 +161,16 @@
         const area = parseInt(match.slice(0, 3), 10);
         return area !== 0 && area !== 666 && area < 900;
       },
+      maskFn: maskSsn,
     },
-    email:    { re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/, label: 'email address',    severity: 'low' },
+    email:    { re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/, label: 'email address',    severity: 'low',  maskFn: maskEmail },
     password: { re: /(?:password|passwd|pwd|salasana)\s*[:=]\s*\S+/i,     label: 'password pattern', severity: 'medium' },
-    iban:     { re: /\b[A-Z]{2}\d{2}[A-Z0-9]{4,30}\b/,                   label: 'IBAN number',      severity: 'low' },
+    iban:     {
+      re: /\b[A-Z]{2}\d{2}[A-Z0-9]{4,30}\b/,
+      label: 'IBAN number',
+      severity: 'low',
+      maskFn: maskIban,
+    },
     credit_card: {
       // Match 13–19 digits optionally separated by spaces or dashes.
       re: /\b\d[\d \t\-]{11,20}\d\b/,
@@ -94,6 +180,7 @@
         const digits = match.replace(/[\s\-]/g, '');
         return digits.length >= 13 && digits.length <= 19 && luhn(digits);
       },
+      maskFn: maskCreditCard,
     },
   };
 
@@ -103,20 +190,22 @@
   // Finds every alphanumeric run of 20+ characters in the text and flags runs
   // whose Shannon entropy exceeds ENTROPY_THRESHOLD as a potential API key /
   // secret token with high severity.
-  //
-  // Threshold of 4.5 bits/char is chosen so that:
-  //   • Random alphanumeric strings (a-z, A-Z, 0-9) score ~5.5–5.9 → flagged
-  //   • Monotone or dictionary-like lowercase strings score < 4.5   → safe
   // ---------------------------------------------------------------------------
   const ENTROPY_THRESHOLD = 4.5;
   const ENTROPY_MIN_LEN   = 20;
-  const TOKEN_RE = new RegExp(`[a-zA-Z0-9+/]{${ENTROPY_MIN_LEN},}`, 'g'); // base64-safe char set
+  const TOKEN_RE = new RegExp(`[a-zA-Z0-9+/]{${ENTROPY_MIN_LEN},}`, 'g');
 
   function scanEntropy(text) {
     const hits = [];
     for (const match of text.matchAll(TOKEN_RE)) {
       if (shannonEntropy(match[0]) > ENTROPY_THRESHOLD) {
-        hits.push({ label: 'high-entropy token (possible API key/secret)', severity: 'high' });
+        hits.push({
+          label: 'high-entropy token (possible API key/secret)',
+          severity: 'high',
+          match: match[0],
+          index: match.index,
+          maskFn: apiKeyMask(0),
+        });
         break; // one entropy hit per scan is enough
       }
     }
@@ -126,31 +215,70 @@
   const BANNER_ID = 'ps-dlp-banner';
   const DISMISS_KEY = 'ps-dlp-dismissed';
 
-  // Returns an array of { label, severity } objects for every pattern that fires.
+  // ---------------------------------------------------------------------------
+  // scanText(text) — returns an array of hit objects for every detected match.
+  //
+  // Each hit: { label, severity, match, index, maskFn? }
+  //   label    – human-readable pattern name
+  //   severity – 'high' | 'medium' | 'low'
+  //   match    – the exact matched substring
+  //   index    – character position of match in text
+  //   maskFn   – (match: string) => string, if the pattern supports masking
+  //
+  // Multiple occurrences of the same pattern each produce a separate hit so
+  // that maskText() can replace every instance.  showBanner() deduplicates by
+  // label when building the user-facing message.
+  // ---------------------------------------------------------------------------
   function scanText(text) {
     const hits = [];
 
-    // 1. Known-prefix and PII pattern checks.
+    // 1. Known-prefix and PII pattern checks — collect every occurrence.
     for (const [, pattern] of Object.entries(PATTERNS)) {
-      const { re, label, severity = 'warning', validate } = pattern;
+      const { re, label, severity = 'warning', validate, maskFn } = pattern;
+      const globalRe = new RegExp(re.source, 'g');
+      const matches = [...text.matchAll(globalRe)];
+
       if (validate) {
-        // Re-run with global flag so we check every candidate match.
-        const globalRe = new RegExp(re.source, 'g');
-        const matches = [...text.matchAll(globalRe)];
-        if (matches.some(m => validate(m[0]))) hits.push({ label, severity });
+        for (const m of matches) {
+          if (validate(m[0])) hits.push({ label, severity, match: m[0], index: m.index, maskFn });
+        }
       } else {
-        if (re.test(text)) hits.push({ label, severity });
+        for (const m of matches) {
+          hits.push({ label, severity, match: m[0], index: m.index, maskFn });
+        }
       }
     }
 
-    // 2. Entropy-based check — catches secrets with no recognised prefix.
-    //    Only run when no high-severity hit was already found, to avoid
-    //    duplicate banners for the same token.
+    // 2. Entropy-based check — only when no high-severity hit was already found.
     if (!hits.some(h => h.severity === 'high')) {
       hits.push(...scanEntropy(text));
     }
 
     return hits;
+  }
+
+  // ---------------------------------------------------------------------------
+  // maskText(text) — returns text with every detected sensitive match replaced
+  // by its masked equivalent.
+  //
+  // Replacements are applied in reverse index order so that earlier positions
+  // are not shifted by substitutions that precede them.
+  // ---------------------------------------------------------------------------
+  function maskText(text) {
+    const hits = scanText(text);
+
+    // Only mask hits that have both a position and a masking function.
+    const maskable = hits.filter(h => h.maskFn && h.match !== undefined && h.index !== undefined);
+
+    // Sort descending by index so replacements don't shift subsequent positions.
+    maskable.sort((a, b) => b.index - a.index);
+
+    let result = text;
+    for (const hit of maskable) {
+      const masked = hit.maskFn(hit.match);
+      result = result.slice(0, hit.index) + masked + result.slice(hit.index + hit.match.length);
+    }
+    return result;
   }
 
   function getInputText(el) {
@@ -175,7 +303,6 @@
   const TIER_CONFIG = {
     high: {
       cssClass: 'ps-high',
-      // Label list appended after the static text for high findings.
       buildText: (labels) => `🔴 High – sensitive data detected: ${labels.join(', ')}`,
     },
     medium: {
@@ -188,7 +315,7 @@
     },
   };
 
-  // hits — array of { label, severity } from scanText()
+  // hits — array of { label, severity, ... } from scanText()
   function showBanner(hits, anchorEl) {
     if (sessionStorage.getItem(DISMISS_KEY)) return;
 
@@ -274,7 +401,6 @@
 
   const INPUT_SELECTORS = [
     // ChatGPT — ProseMirror contenteditable div (newer UI, ~2024+).
-    // id="prompt-textarea" is stable; data-placeholder is a secondary anchor.
     '#prompt-textarea',
     'div[contenteditable="true"][data-placeholder]',
     // Generic contenteditable textboxes (Claude.ai, older ChatGPT versions).
@@ -317,14 +443,7 @@
   }
 
   // Submit-button selectors tried in order across all supported platforms.
-  // Deliberately no generic fallbacks: if none of the platform-specific
-  // selectors match, clickPlatformSubmit() does nothing and the user can
-  // submit manually — safer than clicking an arbitrary button on the page.
   const SUBMIT_SELECTORS = [
-    // ChatGPT — data-testid is correct as of 2025 but OpenAI changes test-ids
-    // frequently. If this stops working, inspect the send button for a new
-    // data-testid value or a stable aria-label, and update accordingly.
-    // TODO: add aria-label fallback once OpenAI ships a localised label.
     'button[data-testid="send-button"]',
     // Claude.ai
     'button[aria-label="Send Message"]',
@@ -334,8 +453,7 @@
   ];
 
   // Flag that allows the programmatic re-click (from "Send anyway") to bypass
-  // the send-button click interceptor below.  Set to true immediately before
-  // btn.click() and reset inside the interceptor on the very next event.
+  // the send-button click interceptor below.
   let _bypassSendClick = false;
 
   /** Click the platform's native send / submit button. */
@@ -445,10 +563,6 @@
   // Send-button click intercept — mirrors the Enter-key intercept above so
   // that mouse-driven submission is also protected when a 🔴 High alert is
   // active.
-  //
-  // Runs in capture phase so it fires before any platform click handler.
-  // When the user confirms "Send anyway", clickPlatformSubmit() sets
-  // _bypassSendClick = true so the programmatic re-click passes through.
   // ---------------------------------------------------------------------------
   document.addEventListener('click', (e) => {
     // Allow the programmatic re-click from "Send anyway" to pass through.
@@ -472,5 +586,10 @@
     e.stopImmediatePropagation();
     showInterceptPopup();
   }, /* capture = */ true);
+
+  // ---------------------------------------------------------------------------
+  // Public API — exposed for use by other extension scripts and tests.
+  // ---------------------------------------------------------------------------
+  window.promptSentinel = { scanText, maskText };
 
 })();
