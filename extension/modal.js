@@ -59,15 +59,15 @@
     const heading = document.createElement('h2');
     heading.id = 'ps-modal-title';
     heading.className = 'ps-heading';
-    heading.textContent = 'Tämä on opetushetki!';
+    heading.textContent = 'This is a learning moment!';
 
     // ── Body copy ───────────────────────────────────────────────────────────
     const body = document.createElement('p');
     body.className = 'ps-body';
     body.textContent =
-      'Klikkasit linkkiä tekoälyn vastauksessa. ' +
-      'Tekoäly voi ehdottaa haitallisia tai harhaanjohtavia linkkejä — ' +
-      'harkitse ennen kuin jatkat.';
+      'You clicked a link inside an AI response. ' +
+      'AI can suggest harmful or misleading links — ' +
+      'think before you proceed.';
 
     // ── Destination URL display ──────────────────────────────────────────────
     const urlBox = document.createElement('div');
@@ -75,7 +75,7 @@
 
     const urlLabel = document.createElement('span');
     urlLabel.className = 'ps-url-label';
-    urlLabel.textContent = 'Kohde-URL:';
+    urlLabel.textContent = 'Destination URL:';
 
     const urlValue = document.createElement('span');
     urlValue.className = 'ps-url-value';
