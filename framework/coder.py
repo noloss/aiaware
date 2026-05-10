@@ -3,6 +3,8 @@ import argparse
 import re
 import subprocess
 import sys
+import threading
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -64,18 +66,34 @@ def run_issue(issue_number: int, feedback: str | None = None) -> int:
         )
 
     print("[coder] Running Claude Code...")
+    proc = subprocess.Popen(
+        [CLAUDE_BIN, "--print", "--dangerously-skip-permissions",
+         "--system-prompt", system, task],
+        cwd=PROJECT_ROOT,
+    )
+
+    stop_heartbeat = threading.Event()
+
+    def _heartbeat():
+        start = time.monotonic()
+        while not stop_heartbeat.wait(30):
+            elapsed = int(time.monotonic() - start)
+            print(f"[coder] still running... {elapsed}s elapsed", file=sys.stderr)
+
+    t = threading.Thread(target=_heartbeat, daemon=True)
+    t.start()
     try:
-        result = subprocess.run(
-            [CLAUDE_BIN, "--print", "--dangerously-skip-permissions",
-             "--max-turns", "40",
-             "--system-prompt", system, task],
-            cwd=PROJECT_ROOT,
-            timeout=600,  # 10-minute hard limit
-        )
+        proc.wait(timeout=600)
     except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
         print("[coder] Claude Code timed out after 10 minutes.", file=sys.stderr)
         return None
-    if result.returncode != 0:
+    finally:
+        stop_heartbeat.set()
+        t.join()
+
+    if proc.returncode != 0:
         print("[coder] Claude Code exited with error.", file=sys.stderr)
         return None
 
