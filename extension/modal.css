@@ -26,6 +26,7 @@
 /* ── Dialog box ──────────────────────────────────────────────────────────── */
 .ps-dialog {
   all: initial;
+  position: relative; /* anchor for the corner × button */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #ffffff;
   border-radius: 12px;
@@ -38,6 +39,36 @@
   gap: 16px;
   /* Slide-up entry */
   animation: ps-slide-up 0.15s ease-out both;
+}
+
+/* ── Corner × close button ───────────────────────────────────────────────── */
+.ps-dialog-close {
+  all: initial;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 18px;
+  line-height: 1;
+  color: #888888;
+  cursor: pointer;
+  opacity: 0.6;
+  border-radius: 4px;
+}
+
+.ps-dialog-close:hover {
+  opacity: 1;
+}
+
+.ps-dialog-close:focus-visible {
+  outline: 3px solid #0078d4;
+  outline-offset: 2px;
+  opacity: 1;
 }
 
 @keyframes ps-slide-up {
