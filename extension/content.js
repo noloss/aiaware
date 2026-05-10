@@ -7,7 +7,7 @@
 
   // Defence-in-depth: ensure we only activate on the intended hosts even if
   // Chrome injects this script somewhere unexpected during development.
-  const SUPPORTED_HOSTS = ['claude.ai', 'gemini.google.com', 'chat.openai.com'];
+  const SUPPORTED_HOSTS = ['claude.ai', 'gemini.google.com', 'chat.openai.com', 'chatgpt.com'];
   const host = location.hostname;
   if (!SUPPORTED_HOSTS.some(h => host === h || host.endsWith('.' + h))) return;
 
