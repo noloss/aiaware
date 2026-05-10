@@ -532,6 +532,13 @@
         return `Your message appears to contain sensitive data${detail}. Are you sure you want to send it?`;
       })();
 
+    // Corner × close button — dismisses the popup without sending.
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'ps-dialog-close';
+    closeBtn.textContent = '×';
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.addEventListener('click', closeIntercept);
+
     const actions = document.createElement('div');
     actions.className = 'ps-actions';
 
@@ -548,12 +555,6 @@
       clickPlatformSubmit();
     });
 
-    // Secondary action — close without sending.
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'ps-btn ps-btn-proceed';
-    cancelBtn.textContent = 'Cancel';
-    cancelBtn.addEventListener('click', closeIntercept);
-
     // Secondary action — send the original unmasked message.
     const sendBtn = document.createElement('button');
     sendBtn.className = 'ps-btn ps-btn-proceed';
@@ -563,8 +564,8 @@
       clickPlatformSubmit();
     });
 
-    actions.append(maskBtn, cancelBtn, sendBtn);
-    dialog.append(icon, heading, body, actions);
+    actions.append(maskBtn, sendBtn);
+    dialog.append(closeBtn, icon, heading, body, actions);
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
 
