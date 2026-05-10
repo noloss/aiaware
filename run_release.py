@@ -13,7 +13,7 @@ from framework.reviewer import review_pr
 MAX_RETRIES = 3
 
 
-def fetch_release_issues(release_number: int) -> list[dict]:
+def fetch_release_issues(release_number: str) -> list[dict]:
     """Fetch open+closed issues from GitHub with the release-N label."""
     label = f"release-{release_number}"
     raw = _run(["issue", "list", "--repo", "noloss/promptsentinel",
@@ -23,7 +23,7 @@ def fetch_release_issues(release_number: int) -> list[dict]:
     return sorted(issues, key=lambda x: x["number"])
 
 
-def run_release(release_number: int) -> None:
+def run_release(release_number: str) -> None:
     release_tasks = fetch_release_issues(release_number)
 
     if not release_tasks:
@@ -81,8 +81,8 @@ def run_release(release_number: int) -> None:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--release", type=int, required=True,
-                        help="Release number to run (1–6)")
+    parser.add_argument("--release", type=str, required=True,
+                        help="Release label suffix, e.g. 1, 2, or masking")
     args = parser.parse_args()
     run_release(args.release)
 
