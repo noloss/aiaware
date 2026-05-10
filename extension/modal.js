@@ -1,12 +1,12 @@
 // modal.js — Warning modal for intercepted link clicks.
-// Listens for the 'promptsentinel:linkclick' custom event fired by content.js
+// Listens for the 'aiaware:linkclick' custom event fired by content.js
 // and renders an educational overlay.  Navigation is already cancelled by
 // content.js before this module receives the event.
 
 (() => {
   // Guard: this module should only be initialised once per page.
-  if (window.__promptSentinelModalLoaded) return;
-  window.__promptSentinelModalLoaded = true;
+  if (window.__aiAwareModalLoaded) return;
+  window.__aiAwareModalLoaded = true;
 
   // ---------------------------------------------------------------------------
   // DOM helpers
@@ -35,10 +35,10 @@
 
     // ── Overlay (full-screen backdrop) ──────────────────────────────────────
     const overlay = document.createElement('div');
-    overlay.className = 'ps-overlay';
+    overlay.className = 'aa-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'ps-modal-title');
+    overlay.setAttribute('aria-labelledby', 'aa-modal-title');
 
     // Clicking directly on the backdrop (not on the dialog) also closes.
     overlay.addEventListener('click', (e) => {
@@ -47,23 +47,23 @@
 
     // ── Dialog box ──────────────────────────────────────────────────────────
     const dialog = document.createElement('div');
-    dialog.className = 'ps-dialog';
+    dialog.className = 'aa-dialog';
 
     // ── Icon ────────────────────────────────────────────────────────────────
     const icon = document.createElement('div');
-    icon.className = 'ps-icon';
+    icon.className = 'aa-icon';
     icon.textContent = '⚠️';
     icon.setAttribute('aria-hidden', 'true');
 
     // ── Heading ─────────────────────────────────────────────────────────────
     const heading = document.createElement('h2');
-    heading.id = 'ps-modal-title';
-    heading.className = 'ps-heading';
+    heading.id = 'aa-modal-title';
+    heading.className = 'aa-heading';
     heading.textContent = 'This is a learning moment!';
 
     // ── Body copy ───────────────────────────────────────────────────────────
     const body = document.createElement('p');
-    body.className = 'ps-body';
+    body.className = 'aa-body';
     body.textContent =
       'You clicked a link inside an AI response. ' +
       'AI can suggest harmful or misleading links — ' +
@@ -71,29 +71,29 @@
 
     // ── Destination URL display ──────────────────────────────────────────────
     const urlBox = document.createElement('div');
-    urlBox.className = 'ps-url-box';
+    urlBox.className = 'aa-url-box';
 
     const urlLabel = document.createElement('span');
-    urlLabel.className = 'ps-url-label';
+    urlLabel.className = 'aa-url-label';
     urlLabel.textContent = 'Destination URL:';
 
     const urlValue = document.createElement('span');
-    urlValue.className = 'ps-url-value';
+    urlValue.className = 'aa-url-value';
     urlValue.textContent = url;
 
     urlBox.append(urlLabel, urlValue);
 
     // ── Action buttons ───────────────────────────────────────────────────────
     const actions = document.createElement('div');
-    actions.className = 'ps-actions';
+    actions.className = 'aa-actions';
 
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'ps-btn ps-btn-close';
+    closeBtn.className = 'aa-btn aa-btn-close';
     closeBtn.textContent = 'Close';
     closeBtn.addEventListener('click', closeModal);
 
     const proceedBtn = document.createElement('button');
-    proceedBtn.className = 'ps-btn ps-btn-proceed';
+    proceedBtn.className = 'aa-btn aa-btn-proceed';
     proceedBtn.textContent = 'I understand – continue';
     proceedBtn.addEventListener('click', () => {
       // Ask the background service worker to open the URL.
@@ -130,7 +130,7 @@
   // ---------------------------------------------------------------------------
   // Listen for the custom event dispatched by content.js
   // ---------------------------------------------------------------------------
-  document.addEventListener('promptsentinel:linkclick', (e) => {
+  document.addEventListener('aiaware:linkclick', (e) => {
     const { url } = /** @type {CustomEvent} */ (e).detail;
     showModal(url);
   });

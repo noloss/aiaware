@@ -1,4 +1,4 @@
-#ps-dlp-banner {
+#aa-dlp-banner {
   all: initial;
   display: flex;
   align-items: center;
@@ -18,7 +18,7 @@
   width: 100%;
 }
 
-#ps-dlp-banner span {
+#aa-dlp-banner span {
   all: initial;
   font-family: inherit;
   font-size: inherit;
@@ -26,7 +26,7 @@
   line-height: inherit;
 }
 
-#ps-dlp-dismiss {
+#aa-dlp-dismiss {
   all: initial;
   cursor: pointer;
   font-size: 14px;
@@ -37,28 +37,28 @@
   line-height: 1;
 }
 
-#ps-dlp-dismiss:hover {
+#aa-dlp-dismiss:hover {
   opacity: 1;
 }
 
 /* Medium-severity variant — orange — shown for password patterns. */
-#ps-dlp-banner.ps-medium {
+#aa-dlp-banner.aa-medium {
   background: #FFEDD5;
   color: #9A3412;
   border-color: #F97316;
 }
 
-#ps-dlp-banner.ps-medium #ps-dlp-dismiss {
+#aa-dlp-banner.aa-medium #aa-dlp-dismiss {
   color: #9A3412;
 }
 
 /* High-severity variant — red — shown for API keys, SSNs, credit cards. */
-#ps-dlp-banner.ps-high {
+#aa-dlp-banner.aa-high {
   background: #FEE2E2;
   color: #991B1B;
   border-color: #EF4444;
 }
 
-#ps-dlp-banner.ps-high #ps-dlp-dismiss {
+#aa-dlp-banner.aa-high #aa-dlp-dismiss {
   color: #991B1B;
 }

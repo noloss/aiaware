@@ -1,6 +1,6 @@
 (() => {
-  if (window.__promptSentinelDlpLoaded) return;
-  window.__promptSentinelDlpLoaded = true;
+  if (window.__aiAwareDlpLoaded) return;
+  window.__aiAwareDlpLoaded = true;
 
   // ---------------------------------------------------------------------------
   // Luhn algorithm — returns true when the digit string has a valid check digit.
@@ -212,8 +212,8 @@
     return hits;
   }
 
-  const BANNER_ID = 'ps-dlp-banner';
-  const DISMISS_KEY = 'ps-dlp-dismissed';
+  const BANNER_ID = 'aa-dlp-banner';
+  const DISMISS_KEY = 'aa-dlp-dismissed';
 
   // ---------------------------------------------------------------------------
   // scanText(text) — returns an array of hit objects for every detected match.
@@ -333,11 +333,11 @@
 
   const TIER_CONFIG = {
     high: {
-      cssClass: 'ps-high',
+      cssClass: 'aa-high',
       buildText: (labels) => `🔴 High – sensitive data detected: ${labels.join(', ')}`,
     },
     medium: {
-      cssClass: 'ps-medium',
+      cssClass: 'aa-medium',
       buildText: () => '🟠 Medium – potentially sensitive data',
     },
     low: {
@@ -360,7 +360,7 @@
       banner.id = BANNER_ID;
       banner.dataset.labels = '';
       const btn = document.createElement('button');
-      btn.id = 'ps-dlp-dismiss';
+      btn.id = 'aa-dlp-dismiss';
       btn.textContent = '✕';
       btn.addEventListener('click', () => {
         sessionStorage.setItem(DISMISS_KEY, '1');
@@ -371,11 +371,11 @@
     }
 
     // Apply exactly one severity modifier class; remove the others.
-    banner.classList.remove('ps-high', 'ps-medium');
+    banner.classList.remove('aa-high', 'aa-medium');
     if (tier.cssClass) banner.classList.add(tier.cssClass);
 
     // Rebuild text content, preserving the dismiss button.
-    const dismiss = banner.querySelector('#ps-dlp-dismiss');
+    const dismiss = banner.querySelector('#aa-dlp-dismiss');
     banner.textContent = '';
     const msg = document.createElement('span');
     msg.textContent = tier.buildText(uniqueLabels);
@@ -447,7 +447,7 @@
     for (const sel of INPUT_SELECTORS) {
       const els = document.querySelectorAll(sel);
       for (const el of els) {
-        if (el.closest('#ps-dlp-banner')) continue;
+        if (el.closest('#aa-dlp-banner')) continue;
         attachToInput(el);
       }
     }
@@ -470,7 +470,7 @@
     return (
       banner != null &&
       banner.style.display !== 'none' &&
-      banner.classList.contains('ps-high')
+      banner.classList.contains('aa-high')
     );
   }
 
@@ -504,7 +504,7 @@
     }
   }
 
-  const INTERCEPT_OVERLAY_ID = 'ps-intercept-overlay';
+  const INTERCEPT_OVERLAY_ID = 'aa-intercept-overlay';
 
   function closeIntercept() {
     const el = document.getElementById(INTERCEPT_OVERLAY_ID);
@@ -517,29 +517,29 @@
 
     const overlay = document.createElement('div');
     overlay.id = INTERCEPT_OVERLAY_ID;
-    overlay.className = 'ps-overlay';
+    overlay.className = 'aa-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'ps-intercept-title');
+    overlay.setAttribute('aria-labelledby', 'aa-intercept-title');
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeIntercept();
     });
 
     const dialog = document.createElement('div');
-    dialog.className = 'ps-dialog';
+    dialog.className = 'aa-dialog';
 
     const icon = document.createElement('div');
-    icon.className = 'ps-icon';
+    icon.className = 'aa-icon';
     icon.textContent = '🛡️';
     icon.setAttribute('aria-hidden', 'true');
 
     const heading = document.createElement('h2');
-    heading.id = 'ps-intercept-title';
-    heading.className = 'ps-heading';
+    heading.id = 'aa-intercept-title';
+    heading.className = 'aa-heading';
     heading.textContent = 'Security Warning';
 
     const body = document.createElement('p');
-    body.className = 'ps-body';
+    body.className = 'aa-body';
     body.textContent =
       (() => {
         const labels = document.getElementById(BANNER_ID)?.dataset.labels;
@@ -549,17 +549,17 @@
 
     // Corner × close button — dismisses the popup without sending.
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'ps-dialog-close';
+    closeBtn.className = 'aa-dialog-close';
     closeBtn.textContent = '×';
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.addEventListener('click', closeIntercept);
 
     const actions = document.createElement('div');
-    actions.className = 'ps-actions';
+    actions.className = 'aa-actions';
 
     // Primary action — mask sensitive data and send.
     const maskBtn = document.createElement('button');
-    maskBtn.className = 'ps-btn ps-btn-close';
+    maskBtn.className = 'aa-btn aa-btn-close';
     maskBtn.textContent = 'Mask & Send';
     maskBtn.addEventListener('click', () => {
       if (activeInputEl) {
@@ -576,7 +576,7 @@
 
     // Secondary action — send the original unmasked message.
     const sendBtn = document.createElement('button');
-    sendBtn.className = 'ps-btn ps-btn-proceed';
+    sendBtn.className = 'aa-btn aa-btn-proceed';
     sendBtn.textContent = 'Continue anyway';
     sendBtn.addEventListener('click', () => {
       closeIntercept();
@@ -646,6 +646,6 @@
   // ---------------------------------------------------------------------------
   // Public API — exposed for use by other extension scripts and tests.
   // ---------------------------------------------------------------------------
-  window.promptSentinel = { scanText, maskText };
+  window.aiAware = { scanText, maskText };
 
 })();

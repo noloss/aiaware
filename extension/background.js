@@ -4,7 +4,7 @@
 chrome.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === 'install') {
     chrome.storage.local.set({ initialized: true, version: '0.1.0' });
-    console.log('[PromptSentinel] Extension installed.');
+    console.log('[AI Aware] Extension installed.');
   }
 });
 

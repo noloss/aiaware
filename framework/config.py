@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-GITHUB_REPO = os.getenv("GITHUB_REPO", "noloss/promptsentinel")
+GITHUB_REPO = os.getenv("GITHUB_REPO", "noloss/aiaware")
 GH_BIN = os.path.expanduser("~/.local/bin/gh")
 CLAUDE_BIN = "claude"
 

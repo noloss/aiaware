@@ -16,7 +16,7 @@ MAX_RETRIES = 3
 def fetch_release_issues(release_number: str) -> list[dict]:
     """Fetch open+closed issues from GitHub with the release-N label."""
     label = f"release-{release_number}"
-    raw = _run(["issue", "list", "--repo", "noloss/promptsentinel",
+    raw = _run(["issue", "list", "--repo", "noloss/aiaware",
                 "--label", label, "--state", "all",
                 "--json", "number,title", "--limit", "100"]).stdout
     issues = json.loads(raw)

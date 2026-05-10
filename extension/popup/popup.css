@@ -35,27 +35,27 @@ main {
 
 /* ── Settings section ────────────────────────────────────────────────────── */
 
-.ps-settings {
+.aa-settings {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid #e0e7ff;
 }
 
-.ps-toggle-row {
+.aa-toggle-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.ps-toggle-label {
+.aa-toggle-label {
   font-size: 13px;
   font-weight: 600;
   color: #1e1b4b;
 }
 
 /* "Always on" badge replaces the checkbox when a feature has no user toggle */
-.ps-badge-on {
+.aa-badge-on {
   font-size: 11px;
   font-weight: 600;
   color: #166534;
@@ -67,7 +67,7 @@ main {
   flex-shrink: 0;
 }
 
-.ps-setting-desc {
+.aa-setting-desc {
   margin-top: 6px;
   font-size: 11px;
   color: #6b7280;
@@ -76,7 +76,7 @@ main {
 
 /* ── Zero-Network privacy notice ─────────────────────────────────────────── */
 
-.ps-zero-network {
+.aa-zero-network {
   margin-top: 12px;
   padding: 10px 12px;
   background: #f0fdf4;
@@ -84,19 +84,19 @@ main {
   border-radius: 8px;
 }
 
-.ps-zero-network-header {
+.aa-zero-network-header {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-bottom: 6px;
 }
 
-.ps-zero-network-icon {
+.aa-zero-network-icon {
   font-size: 14px;
   line-height: 1;
 }
 
-.ps-zero-network-badge {
+.aa-zero-network-badge {
   font-size: 11px;
   font-weight: 700;
   color: #166534;
@@ -104,7 +104,7 @@ main {
   letter-spacing: 0.04em;
 }
 
-.ps-zero-network-msg {
+.aa-zero-network-msg {
   font-size: 11px;
   color: #15803d;
   line-height: 1.5;

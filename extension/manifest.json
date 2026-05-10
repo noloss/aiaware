@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "PromptSentinel",
+  "name": "AI Aware",
   "version": "0.1.0",
   "description": "AI chat DLP guard \u2013 Zero-Network, your data never leaves your device.",
 
@@ -17,7 +17,7 @@
       "48":  "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "PromptSentinel"
+    "default_title": "AI Aware"
   },
 
   "background": {

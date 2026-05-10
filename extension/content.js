@@ -2,8 +2,8 @@
 
 (() => {
   // Guard against double-injection (e.g. same-page navigation in SPAs).
-  if (window.__promptSentinelLoaded) return;
-  window.__promptSentinelLoaded = true;
+  if (window.__aiAwareLoaded) return;
+  window.__aiAwareLoaded = true;
 
   // Defence-in-depth: ensure we only activate on the intended hosts even if
   // Chrome injects this script somewhere unexpected during development.
@@ -11,7 +11,7 @@
   const host = location.hostname;
   if (!SUPPORTED_HOSTS.some(h => host === h || host.endsWith('.' + h))) return;
 
-  console.log('[PromptSentinel] active on', host);
+  console.log('[AI Aware] active on', host);
 
   // ---------------------------------------------------------------------------
   // Chat-response container selectors (per host).
@@ -99,11 +99,11 @@
     event.preventDefault();
 
     const url = anchor.href;
-    console.log('[PromptSentinel] Intercepted link click inside chat response:', url);
+    console.log('[AI Aware] Intercepted link click inside chat response:', url);
 
     // Dispatch a custom event so other modules (safety check, warning modal,
     // etc.) can react without coupling to this listener directly.
-    document.dispatchEvent(new CustomEvent('promptsentinel:linkclick', {
+    document.dispatchEvent(new CustomEvent('aiaware:linkclick', {
       detail: { url, anchor },
       bubbles: false,
     }));

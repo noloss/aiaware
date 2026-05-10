@@ -89,7 +89,7 @@ def main():
     tasks_path = PROJECT_ROOT / "tasks.json"
     tasks_path.write_text(json.dumps(created, indent=2, ensure_ascii=False))
     print(f"\nDone. {len(created)} issues created. Saved to tasks.json.")
-    print(f"View at: https://github.com/noloss/promptsentinel/issues")
+    print(f"View at: https://github.com/noloss/aiaware/issues")
 
 
 if __name__ == "__main__":
