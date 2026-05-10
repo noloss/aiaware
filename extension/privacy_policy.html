@@ -89,6 +89,10 @@
       margin-bottom: 0.75rem;
     }
 
+    p strong {
+      color: #e2e8f0;
+    }
+
     ul {
       list-style: none;
       padding: 0;
@@ -98,7 +102,7 @@
     ul li {
       color: #a0aec0;
       font-size: 0.95rem;
-      padding: 0.25rem 0 0.25rem 1.5rem;
+      padding: 0.3rem 0 0.3rem 1.5rem;
       position: relative;
     }
 
@@ -109,6 +113,19 @@
       color: #4299e1;
     }
 
+    ul li strong {
+      color: #cbd5e0;
+    }
+
+    code {
+      background: #2d3748;
+      color: #90cdf4;
+      border-radius: 4px;
+      padding: 0.1em 0.4em;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.875em;
+    }
+
     .highlight {
       background: #1a202c;
       border-left: 3px solid #4299e1;
@@ -117,6 +134,44 @@
       margin: 1rem 0;
       font-size: 0.9rem;
       color: #cbd5e0;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.25rem;
+      font-size: 0.875rem;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      background: #1a202c;
+      color: #a0aec0;
+      font-weight: 600;
+      border-bottom: 1px solid #2d3748;
+    }
+
+    .data-table td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid #1a202c;
+      color: #a0aec0;
+      vertical-align: top;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge-no {
+      display: inline-block;
+      background: #22543d;
+      color: #9ae6b4;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 0.15em 0.5em;
+      letter-spacing: 0.03em;
     }
 
     footer {
@@ -139,6 +194,7 @@
 </head>
 <body>
   <div class="container">
+
     <header>
       <span class="shield">🛡️</span>
       <div>
@@ -147,81 +203,133 @@
       </div>
     </header>
 
+    <!-- ── Zero-Network callout ─────────────────────────────────────────── -->
     <div class="zero-network-banner">
       <span class="icon">🔒</span>
       <div>
         <strong>Zero-Network Extension</strong>
         <p>
-          AI Aware operates entirely on your device. No user conversation data,
-          no typed text, and no personal information is ever transmitted to any
-          external server — by us or any third party.
+          AI Aware operates entirely on your device. No user conversation text,
+          no typed input, and no personal information is ever transmitted to any
+          external server — by us or any third party. We have no servers.
         </p>
       </div>
     </div>
 
+    <!-- ── 1. What the extension does ───────────────────────────────────── -->
     <h2>1. What AI Aware Does</h2>
     <p>
-      AI Aware is a browser extension that monitors text you are about to submit
-      to AI chat interfaces (such as Claude, Gemini, and ChatGPT) and warns you
-      if it detects patterns that may indicate sensitive or risky content
-      (e.g., credentials, personal data, prompt-injection attempts).
+      AI Aware is a Chrome browser extension that inspects text you are about to
+      submit to AI chat interfaces (such as Claude, Gemini, and ChatGPT) and warns
+      you when it detects sensitive or risky content — for example, API keys,
+      passwords, personal identifiers, or prompt-injection patterns. All detection
+      logic runs locally in your browser using JavaScript; no text is ever sent
+      elsewhere.
     </p>
 
+    <!-- ── 2. Data we collect ────────────────────────────────────────────── -->
     <h2>2. Data We Collect</h2>
     <p>
-      <strong>We collect nothing.</strong> AI Aware does not collect, transmit,
-      store on any server, or share any data about you or your activity.
+      <strong>We collect nothing.</strong> AI Aware does not collect, process on
+      a remote server, transmit, or share any data about you or your activity.
     </p>
-    <p>All processing happens locally on your machine:</p>
-    <ul>
-      <li>Text analysis runs inside your browser using JavaScript — never sent to a server.</li>
-      <li>Your extension settings (e.g., enabled/disabled state) are saved to
-          <code>chrome.storage.local</code> — your device only.</li>
-      <li>No analytics, telemetry, crash reports, or usage statistics are collected.</li>
-    </ul>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Data type</th>
+          <th>Accessed locally?</th>
+          <th>Sent to a server?</th>
+          <th>Stored persistently?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Text you type in AI chat</td>
+          <td>Yes — to run the DLP check in your browser</td>
+          <td><span class="badge-no">NEVER</span></td>
+          <td><span class="badge-no">NEVER</span></td>
+        </tr>
+        <tr>
+          <td>Extension preferences (enabled/disabled)</td>
+          <td>Yes</td>
+          <td><span class="badge-no">NEVER</span></td>
+          <td>Yes — <code>chrome.storage.local</code> on your device only</td>
+        </tr>
+        <tr>
+          <td>Analytics / telemetry / crash reports</td>
+          <td colspan="3"><span class="badge-no">NOT COLLECTED</span></td>
+        </tr>
+        <tr>
+          <td>Browsing history</td>
+          <td colspan="3"><span class="badge-no">NOT COLLECTED</span></td>
+        </tr>
+        <tr>
+          <td>Personal identifiers (name, email, IP)</td>
+          <td colspan="3"><span class="badge-no">NOT COLLECTED</span></td>
+        </tr>
+      </tbody>
+    </table>
 
     <div class="highlight">
       No user conversation data is transmitted to external servers — not to our
       servers, not to third-party servers, not to anyone. Your typed text never
-      leaves your device.
+      leaves your browser.
     </div>
 
-    <h2>3. Permissions We Request</h2>
+    <!-- ── 3. Permissions ────────────────────────────────────────────────── -->
+    <h2>3. Permissions We Request and Why</h2>
     <ul>
       <li>
-        <strong>storage</strong> — stores your preferences locally in
-        <code>chrome.storage.local</code>. Data never leaves your device.
+        <strong>storage</strong> — saves your on/off preference to
+        <code>chrome.storage.local</code>. This data lives on your device and is
+        never transmitted anywhere.
       </li>
       <li>
-        <strong>Content scripts on claude.ai, gemini.google.com, chat.openai.com</strong>
-        — injects the DLP monitor UI into AI chat pages. No data from these pages
-        is ever sent anywhere.
+        <strong>Content scripts on <code>claude.ai</code>,
+        <code>gemini.google.com</code>, <code>chat.openai.com</code></strong> —
+        injects the DLP scanner UI into these pages so it can read the text field
+        before you press Send. All analysis runs in your browser; no data from
+        these pages is sent elsewhere.
       </li>
     </ul>
 
+    <!-- ── 4. Third-party services ───────────────────────────────────────── -->
     <h2>4. Third-Party Services</h2>
     <p>
       AI Aware does not integrate with, call, or depend on any third-party
-      service, API, or remote resource. The extension contains no external
-      scripts, fonts, or trackers.
+      service, API, analytics platform, or remote resource. The extension bundles
+      no external scripts, fonts, or tracking pixels.
     </p>
 
-    <h2>5. Children's Privacy</h2>
+    <!-- ── 5. Data sharing ───────────────────────────────────────────────── -->
+    <h2>5. Data Sharing and Sale</h2>
+    <p>
+      We do not sell, rent, trade, or otherwise transfer any user data to outside
+      parties — because we never receive any user data in the first place.
+    </p>
+
+    <!-- ── 6. Children's privacy ────────────────────────────────────────── -->
+    <h2>6. Children's Privacy</h2>
     <p>
       AI Aware does not knowingly collect information from any users, including
-      children under the age of 13.
+      children under the age of 13. No personal data of any kind is collected by
+      this extension.
     </p>
 
-    <h2>6. Changes to This Policy</h2>
+    <!-- ── 7. Changes to this policy ────────────────────────────────────── -->
+    <h2>7. Changes to This Policy</h2>
     <p>
-      If this policy is updated, the "Last updated" date above will be revised.
-      We will not make changes that weaken these privacy guarantees without
-      clearly communicating them.
+      If this policy is updated, the "Last updated" date at the top of this page
+      will be revised. We will not make changes that weaken these privacy
+      guarantees without clearly communicating them in the extension's release
+      notes.
     </p>
 
-    <h2>7. Contact</h2>
+    <!-- ── 8. Contact ────────────────────────────────────────────────────── -->
+    <h2>8. Contact</h2>
     <p>
-      Questions or concerns? Open an issue on the
+      Questions or concerns about this policy? Open an issue on the
       <a href="https://github.com/otto-olsson/promptsentinel" target="_blank"
          rel="noopener noreferrer">GitHub repository</a>
       or email
@@ -229,9 +337,10 @@
     </p>
 
     <footer>
-      &copy; 2026 AI Aware. This privacy policy is also available in the extension
-      package at <code>privacy_policy.html</code>.
+      &copy; 2026 AI Aware &mdash; This privacy policy is also bundled with the
+      extension at <code>privacy_policy.html</code>.
     </footer>
+
   </div>
 </body>
 </html>
