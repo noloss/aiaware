@@ -29,12 +29,18 @@ def run_issue(issue_number: int, feedback: str | None = None) -> int:
     print(f"\n[coder] Issue #{issue['number']}: {issue['title']}")
 
     branch = f"feature/issue-{issue['number']}-{slugify(issue['title'])}"
-    existing_branch = branch in git(["branch", "--list", branch])
+    existing_branch = bool(git(["branch", "--list", branch]))
 
-    if feedback and existing_branch:
-        # Retry: checkout existing branch and amend
+    if existing_branch and feedback:
+        # Reviewer retry: continue on the existing branch.
         git(["checkout", branch])
         print(f"[coder] Retrying on existing branch: {branch}")
+    elif existing_branch:
+        # Interrupted run with no PR yet: reset branch to origin/main for a clean start.
+        git(["checkout", branch])
+        git(["reset", "--hard", "origin/main"])
+        git(["clean", "-fd"])
+        print(f"[coder] Restarting on existing branch (reset to origin/main): {branch}")
     else:
         git(["checkout", "main"])
         git(["pull", "origin", "main", "--rebase"])
