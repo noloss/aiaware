@@ -2,7 +2,7 @@
 # All fields ready for the Developer Dashboard submission form.
 
 # ── SHORT DESCRIPTION (max 132 chars) ────────────────────────────────────────
-# Current char count: 86
+# Current char count: 122
 AI chat DLP guard – catches credentials & sensitive data before you hit Send. Zero-Network: data never leaves your device.
 
 # ── DETAILED DESCRIPTION ─────────────────────────────────────────────────────
@@ -29,6 +29,9 @@ English
 
 # ── SCREENSHOTS (1280×800 PNG) ───────────────────────────────────────────────
 screenshot1.png  — DLP Security Intercept modal blocking a message containing an AWS key
+
+# ── PROMOTIONAL TILE (440×280 PNG) ───────────────────────────────────────────
+promo_tile_440x280.png  — Brand tile: shield icon, extension name, key features summary
 
 # ── ICONS ────────────────────────────────────────────────────────────────────
 128×128: ../icons/icon128.png  ✓
