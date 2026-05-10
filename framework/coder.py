@@ -70,18 +70,31 @@ def run_issue(issue_number: int, feedback: str | None = None) -> int:
         [CLAUDE_BIN, "--print", "--dangerously-skip-permissions",
          "--system-prompt", system, task],
         cwd=PROJECT_ROOT,
+        stdout=subprocess.PIPE,
+        text=True,
+        bufsize=1,
     )
 
-    stop_heartbeat = threading.Event()
+    last_activity = ["starting..."]
+    stop_event = threading.Event()
+
+    def _reader():
+        for line in proc.stdout:
+            print(line, end="", flush=True)
+            stripped = line.strip()
+            if stripped:
+                last_activity[0] = stripped[:100]
 
     def _heartbeat():
         start = time.monotonic()
-        while not stop_heartbeat.wait(30):
+        while not stop_event.wait(30):
             elapsed = int(time.monotonic() - start)
-            print(f"[coder] still running... {elapsed}s elapsed", file=sys.stderr)
+            print(f"[coder] {elapsed}s — {last_activity[0]}", file=sys.stderr, flush=True)
 
-    t = threading.Thread(target=_heartbeat, daemon=True)
-    t.start()
+    reader = threading.Thread(target=_reader, daemon=True)
+    heartbeat = threading.Thread(target=_heartbeat, daemon=True)
+    reader.start()
+    heartbeat.start()
     try:
         proc.wait(timeout=600)
     except subprocess.TimeoutExpired:
@@ -90,8 +103,9 @@ def run_issue(issue_number: int, feedback: str | None = None) -> int:
         print("[coder] Claude Code timed out after 10 minutes.", file=sys.stderr)
         return None
     finally:
-        stop_heartbeat.set()
-        t.join()
+        stop_event.set()
+        reader.join()
+        heartbeat.join()
 
     if proc.returncode != 0:
         print("[coder] Claude Code exited with error.", file=sys.stderr)
