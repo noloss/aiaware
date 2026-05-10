@@ -413,8 +413,13 @@
       const hits = scanText(text);
       if (hits.length > 0) {
         showBanner(hits, el);
+        // Render in-field colour highlights so users see exactly which words
+        // are risky before they send.  aiAwareHighlight is loaded by
+        // highlight.js which is injected before dlp.js.
+        window.aiAwareHighlight?.highlightText(el, hits);
       } else {
         hideBanner();
+        window.aiAwareHighlight?.clearHighlights(el);
         // Reset dismiss so banner can reappear if user pastes again later.
         sessionStorage.removeItem(DISMISS_KEY);
       }
