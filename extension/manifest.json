@@ -35,7 +35,8 @@
         "*://claude.ai/*",
         "*://*.claude.ai/*",
         "*://gemini.google.com/*",
-        "*://chat.openai.com/*"
+        "*://chat.openai.com/*",
+        "*://chatgpt.com/*"
       ],
       "js": ["content.js", "modal.js", "dlp.js"],
       "css": ["modal.css", "dlp.css"],

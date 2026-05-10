@@ -367,7 +367,9 @@
         hideBanner();
       });
       banner.appendChild(btn);
-      anchorEl.insertAdjacentElement('afterend', banner);
+      // Append to <body> so the fixed-position banner is never clipped by a
+      // parent element's overflow or flex layout on any supported platform.
+      document.body.appendChild(banner);
     }
 
     // Apply exactly one severity modifier class; remove the others.
@@ -531,12 +533,14 @@
 
   // Submit-button selectors tried in order across all supported platforms.
   const SUBMIT_SELECTORS = [
+    // ChatGPT (chatgpt.com and chat.openai.com)
     'button[data-testid="send-button"]',
+    'button[aria-label="Send message"]',
     // Claude.ai
     'button[aria-label="Send Message"]',
-    'button[aria-label="Send message"]',
     // Gemini
     'button.send-button',
+    'button[aria-label="Send"]',
   ];
 
   // Flag that allows the programmatic re-click (from "Send anyway") to bypass
