@@ -126,7 +126,7 @@
   outline-offset: 2px;
 }
 
-/* "Sulje" — primary / safe action */
+/* "Close" — primary / safe action */
 .ps-btn-close {
   background-color: #0f62fe;
   color: #ffffff;
@@ -136,7 +136,7 @@
   background-color: #0043ce;
 }
 
-/* "Jatka silti" — secondary / risky action */
+/* "Continue anyway" — secondary / risky action */
 .ps-btn-proceed {
   background-color: transparent;
   color: #6b6b6b;
