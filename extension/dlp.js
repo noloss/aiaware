@@ -285,6 +285,22 @@
     return el.tagName === 'TEXTAREA' ? el.value : el.innerText || el.textContent;
   }
 
+  /**
+   * Write `text` back into an input element and notify the platform by
+   * dispatching a bubbling `input` event.
+   *
+   * @param {Element} el   - The monitored input (textarea or contenteditable).
+   * @param {string}  text - The new value to set.
+   */
+  function setInputValue(el, text) {
+    if (el.tagName === 'TEXTAREA') {
+      el.value = text;
+    } else {
+      el.innerText = text;
+    }
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   // ---------------------------------------------------------------------------
   // Severity tier helpers.
   //
@@ -372,6 +388,7 @@
   const debounceTimers = new WeakMap();
 
   function onInput(el) {
+    activeInputEl = el;
     clearTimeout(debounceTimers.get(el));
     debounceTimers.set(el, setTimeout(() => {
       debounceTimers.delete(el);
@@ -456,6 +473,10 @@
   // the send-button click interceptor below.
   let _bypassSendClick = false;
 
+  // Tracks the most recently active monitored input element so that
+  // showInterceptPopup() can read and rewrite its value for Mask & Send.
+  let activeInputEl = null;
+
   /** Click the platform's native send / submit button. */
   function clickPlatformSubmit() {
     for (const sel of SUBMIT_SELECTORS) {
@@ -514,25 +535,40 @@
     const actions = document.createElement('div');
     actions.className = 'ps-actions';
 
+    // Primary action — mask sensitive data and send.
+    const maskBtn = document.createElement('button');
+    maskBtn.className = 'ps-btn ps-btn-close';
+    maskBtn.textContent = 'Mask & Send';
+    maskBtn.addEventListener('click', () => {
+      if (activeInputEl) {
+        const masked = maskText(getInputText(activeInputEl));
+        setInputValue(activeInputEl, masked);
+      }
+      closeIntercept();
+      clickPlatformSubmit();
+    });
+
+    // Secondary action — close without sending.
     const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'ps-btn ps-btn-close';
+    cancelBtn.className = 'ps-btn ps-btn-proceed';
     cancelBtn.textContent = 'Cancel';
     cancelBtn.addEventListener('click', closeIntercept);
 
+    // Secondary action — send the original unmasked message.
     const sendBtn = document.createElement('button');
     sendBtn.className = 'ps-btn ps-btn-proceed';
-    sendBtn.textContent = 'Send anyway';
+    sendBtn.textContent = 'Continue anyway';
     sendBtn.addEventListener('click', () => {
       closeIntercept();
       clickPlatformSubmit();
     });
 
-    actions.append(cancelBtn, sendBtn);
+    actions.append(maskBtn, cancelBtn, sendBtn);
     dialog.append(icon, heading, body, actions);
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
 
-    cancelBtn.focus();
+    maskBtn.focus();
   }
 
   // Close the intercept popup with Escape.
