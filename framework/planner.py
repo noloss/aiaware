@@ -24,9 +24,14 @@ def call_claude(prompt: str, system: str) -> str:
 
 
 def main():
-    prd_path = PROJECT_ROOT / "prd.md"
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--prd", type=str, default=None, help="Path to PRD file (default: prd.md in project root)")
+    args = parser.parse_args()
+
+    prd_path = Path(args.prd) if args.prd else PROJECT_ROOT / "prd.md"
     if not prd_path.exists():
-        print("prd.md not found", file=sys.stderr)
+        print(f"{prd_path} not found", file=sys.stderr)
         sys.exit(1)
 
     prd = prd_path.read_text()
