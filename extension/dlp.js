@@ -286,19 +286,34 @@
   }
 
   /**
-   * Write `text` back into an input element and notify the platform by
-   * dispatching a bubbling `input` event.
+   * Write `text` back into an input element in a way that updates the
+   * platform's internal framework state (React, Lit, etc.), not just the DOM.
+   *
+   * - Textarea (ChatGPT): Use the native HTMLTextAreaElement value setter so
+   *   React's synthetic event system sees a real value change.
+   * - Contenteditable (Gemini, Claude.ai): Use execCommand('insertText') which
+   *   the browser treats as a trusted user edit, correctly syncing all frameworks.
    *
    * @param {Element} el   - The monitored input (textarea or contenteditable).
    * @param {string}  text - The new value to set.
    */
   function setInputValue(el, text) {
     if (el.tagName === 'TEXTAREA') {
-      el.value = text;
+      // Native setter bypasses React's property interception and triggers the
+      // internal onChange machinery when followed by a bubbling 'input' event.
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        HTMLTextAreaElement.prototype, 'value'
+      ).set;
+      nativeSetter.call(el, text);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
     } else {
-      el.innerText = text;
+      // execCommand('insertText') is treated as a genuine user keystroke by
+      // React, Lit, and every other framework — the only reliable way to update
+      // a contenteditable's internal state programmatically.
+      el.focus();
+      document.execCommand('selectAll');
+      document.execCommand('insertText', false, text);
     }
-    el.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   // ---------------------------------------------------------------------------
@@ -552,7 +567,11 @@
         setInputValue(activeInputEl, masked);
       }
       closeIntercept();
-      clickPlatformSubmit();
+      // Defer submit by one tick so the platform's framework (React/Lit) has
+      // time to process the input event and sync its internal state before the
+      // send button is clicked.  Without this, some platforms read their own
+      // cached (unmasked) value from state rather than the updated DOM value.
+      setTimeout(clickPlatformSubmit, 0);
     });
 
     // Secondary action — send the original unmasked message.
