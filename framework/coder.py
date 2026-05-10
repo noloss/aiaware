@@ -58,11 +58,17 @@ def run_issue(issue_number: int, feedback: str | None = None) -> int:
         )
 
     print("[coder] Running Claude Code...")
-    result = subprocess.run(
-        [CLAUDE_BIN, "--print", "--dangerously-skip-permissions",
-         "--system-prompt", system, task],
-        cwd=PROJECT_ROOT
-    )
+    try:
+        result = subprocess.run(
+            [CLAUDE_BIN, "--print", "--dangerously-skip-permissions",
+             "--max-turns", "40",
+             "--system-prompt", system, task],
+            cwd=PROJECT_ROOT,
+            timeout=600,  # 10-minute hard limit
+        )
+    except subprocess.TimeoutExpired:
+        print("[coder] Claude Code timed out after 10 minutes.", file=sys.stderr)
+        sys.exit(1)
     if result.returncode != 0:
         print("[coder] Claude Code exited with error.", file=sys.stderr)
         sys.exit(1)
