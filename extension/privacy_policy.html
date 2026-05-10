@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — AI Aware</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #2d3748;
+    }
+
+    header .shield {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f7fafc;
+    }
+
+    header .subtitle {
+      font-size: 0.875rem;
+      color: #718096;
+      margin-top: 0.15rem;
+    }
+
+    .zero-network-banner {
+      background: linear-gradient(135deg, #1a2540 0%, #1e2d3d 100%);
+      border: 1px solid #3b5bdb;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .zero-network-banner .icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    .zero-network-banner strong {
+      display: block;
+      color: #90cdf4;
+      font-size: 1rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .zero-network-banner p {
+      color: #a0aec0;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-top: 2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    p {
+      color: #a0aec0;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 0.75rem;
+    }
+
+    ul li {
+      color: #a0aec0;
+      font-size: 0.95rem;
+      padding: 0.25rem 0 0.25rem 1.5rem;
+      position: relative;
+    }
+
+    ul li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #4299e1;
+    }
+
+    .highlight {
+      background: #1a202c;
+      border-left: 3px solid #4299e1;
+      border-radius: 0 6px 6px 0;
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      color: #cbd5e0;
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #2d3748;
+      font-size: 0.8rem;
+      color: #4a5568;
+    }
+
+    a {
+      color: #63b3ed;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="shield">🛡️</span>
+      <div>
+        <h1>AI Aware — Privacy Policy</h1>
+        <div class="subtitle">Last updated: 2026-05-10</div>
+      </div>
+    </header>
+
+    <div class="zero-network-banner">
+      <span class="icon">🔒</span>
+      <div>
+        <strong>Zero-Network Extension</strong>
+        <p>
+          AI Aware operates entirely on your device. No user conversation data,
+          no typed text, and no personal information is ever transmitted to any
+          external server — by us or any third party.
+        </p>
+      </div>
+    </div>
+
+    <h2>1. What AI Aware Does</h2>
+    <p>
+      AI Aware is a browser extension that monitors text you are about to submit
+      to AI chat interfaces (such as Claude, Gemini, and ChatGPT) and warns you
+      if it detects patterns that may indicate sensitive or risky content
+      (e.g., credentials, personal data, prompt-injection attempts).
+    </p>
+
+    <h2>2. Data We Collect</h2>
+    <p>
+      <strong>We collect nothing.</strong> AI Aware does not collect, transmit,
+      store on any server, or share any data about you or your activity.
+    </p>
+    <p>All processing happens locally on your machine:</p>
+    <ul>
+      <li>Text analysis runs inside your browser using JavaScript — never sent to a server.</li>
+      <li>Your extension settings (e.g., enabled/disabled state) are saved to
+          <code>chrome.storage.local</code> — your device only.</li>
+      <li>No analytics, telemetry, crash reports, or usage statistics are collected.</li>
+    </ul>
+
+    <div class="highlight">
+      No user conversation data is transmitted to external servers — not to our
+      servers, not to third-party servers, not to anyone. Your typed text never
+      leaves your device.
+    </div>
+
+    <h2>3. Permissions We Request</h2>
+    <ul>
+      <li>
+        <strong>storage</strong> — stores your preferences locally in
+        <code>chrome.storage.local</code>. Data never leaves your device.
+      </li>
+      <li>
+        <strong>Content scripts on claude.ai, gemini.google.com, chat.openai.com</strong>
+        — injects the DLP monitor UI into AI chat pages. No data from these pages
+        is ever sent anywhere.
+      </li>
+    </ul>
+
+    <h2>4. Third-Party Services</h2>
+    <p>
+      AI Aware does not integrate with, call, or depend on any third-party
+      service, API, or remote resource. The extension contains no external
+      scripts, fonts, or trackers.
+    </p>
+
+    <h2>5. Children's Privacy</h2>
+    <p>
+      AI Aware does not knowingly collect information from any users, including
+      children under the age of 13.
+    </p>
+
+    <h2>6. Changes to This Policy</h2>
+    <p>
+      If this policy is updated, the "Last updated" date above will be revised.
+      We will not make changes that weaken these privacy guarantees without
+      clearly communicating them.
+    </p>
+
+    <h2>7. Contact</h2>
+    <p>
+      Questions or concerns? Open an issue on the
+      <a href="https://github.com/otto-olsson/promptsentinel" target="_blank"
+         rel="noopener noreferrer">GitHub repository</a>
+      or email
+      <a href="mailto:otto.olsson@gmail.com">otto.olsson@gmail.com</a>.
+    </p>
+
+    <footer>
+      &copy; 2026 AI Aware. This privacy policy is also available in the extension
+      package at <code>privacy_policy.html</code>.
+    </footer>
+  </div>
+</body>
+</html>
