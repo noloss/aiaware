@@ -68,10 +68,10 @@ def run_issue(issue_number: int, feedback: str | None = None) -> int:
         )
     except subprocess.TimeoutExpired:
         print("[coder] Claude Code timed out after 10 minutes.", file=sys.stderr)
-        sys.exit(1)
+        return None
     if result.returncode != 0:
         print("[coder] Claude Code exited with error.", file=sys.stderr)
-        sys.exit(1)
+        return None
 
     status = git(["status", "--porcelain"])
     if not status:
