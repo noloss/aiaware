@@ -37,7 +37,7 @@
         "*://gemini.google.com/*",
         "*://chat.openai.com/*"
       ],
-      "js": ["content.js", "modal.js", "dlp.js"],
+      "js": ["content.js", "modal.js", "highlight.js", "dlp.js"],
       "css": ["modal.css", "dlp.css"],
       "run_at": "document_idle"
     }

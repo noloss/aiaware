@@ -62,3 +62,35 @@
 #aa-dlp-banner.aa-high #aa-dlp-dismiss {
   color: #991B1B;
 }
+
+/* ── In-field highlight spans ─────────────────────────────────────────────── */
+/* Applied to <span data-aa-hl="1"> elements inside contenteditable inputs
+   and inside the #aa-hl-backdrop overlay that covers textarea inputs.       */
+
+.aa-hl-high {
+  background: rgba(239, 68, 68, 0.35);   /* red   — API keys, SSN, CC numbers */
+  border-radius: 2px;
+}
+
+.aa-hl-medium {
+  background: rgba(249, 115, 22, 0.35);  /* orange — password patterns        */
+  border-radius: 2px;
+}
+
+.aa-hl-low {
+  background: rgba(234, 179, 8, 0.35);   /* yellow — email, IBAN              */
+  border-radius: 2px;
+}
+
+/* ── Textarea backdrop ────────────────────────────────────────────────────── */
+/* The backdrop div mirrors the textarea's font metrics and is layered on top
+   with pointer-events:none; only the span backgrounds are visible because the
+   backdrop text colour is transparent (set inline by highlight.js).         */
+
+#aa-hl-backdrop {
+  /* Geometry and typography are set inline by highlight.js so they always
+     match the live computed style of the observed textarea.
+     This rule exists as a safe reset in case any host stylesheet leaks in. */
+  all: unset;
+  display: block;
+}
