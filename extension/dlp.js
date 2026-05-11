@@ -213,7 +213,11 @@
   }
 
   const BANNER_ID = 'aa-dlp-banner';
-  const DISMISS_KEY = 'aa-dlp-dismissed';
+
+  // Tracks whether the last scan produced a high-severity hit, independently
+  // of banner visibility.  Used by isHighBannerActive() so that dismissing the
+  // banner (visual-only) does not suppress the Send intercept popup.
+  let _hasHighAlert = false;
 
   // ---------------------------------------------------------------------------
   // Banner parent selection — finds the nearest ancestor that can host the
@@ -390,9 +394,8 @@
 
   // hits — array of { label, severity, ... } from scanText()
   function showBanner(hits, anchorEl) {
-    if (sessionStorage.getItem(DISMISS_KEY)) return;
-
     const severity = topSeverity(hits);
+    _hasHighAlert = (severity === 'high');
     const tier = TIER_CONFIG[severity] ?? TIER_CONFIG.low;
     const uniqueLabels = [...new Set(hits.map(h => h.label))];
 
@@ -407,7 +410,6 @@
       btn.id = 'aa-dlp-dismiss';
       btn.textContent = '✕';
       btn.addEventListener('click', () => {
-        sessionStorage.setItem(DISMISS_KEY, '1');
         hideBanner();
       });
       banner.appendChild(btn);
@@ -466,10 +468,9 @@
         // highlight.js which is injected before dlp.js.
         window.aiAwareHighlight?.highlightText(el, hits);
       } else {
+        _hasHighAlert = false;
         hideBanner();
         window.aiAwareHighlight?.clearHighlights(el);
-        // Reset dismiss so banner can reappear if user pastes again later.
-        sessionStorage.removeItem(DISMISS_KEY);
       }
     }, DEBOUNCE_MS));
   }
@@ -574,14 +575,11 @@
   // active.  Always enabled; no user toggle required.
   // ---------------------------------------------------------------------------
 
-  /** Returns true when the DLP banner is currently showing a High-severity hit. */
+  /** Returns true when the last scan detected a High-severity hit.
+   *  Intentionally decoupled from banner visibility so that dismissing the
+   *  banner (visual-only) does not suppress the Send intercept popup. */
   function isHighBannerActive() {
-    const banner = document.getElementById(BANNER_ID);
-    return (
-      banner != null &&
-      banner.style.display !== 'none' &&
-      banner.classList.contains('aa-high')
-    );
+    return _hasHighAlert;
   }
 
   // Submit-button selectors tried in order across all supported platforms.
