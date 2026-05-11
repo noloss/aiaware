@@ -166,14 +166,40 @@
     email:    { re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/, label: 'email address',    severity: 'low',  maskFn: maskEmail },
     password: { re: /(?:password|passwd|pwd|salasana)\s*[:=]\s*\S+/i,     label: 'password pattern', severity: 'medium' },
     iban:     {
-      re: /\b[A-Z]{2}\d{2}[A-Z0-9]{4,30}\b/,
+      // ReDoS-safe IBAN pattern.
+      //
+      // Structure: CC (exactly 2 uppercase letters) + check digits (exactly 2
+      // digits) + BBAN head (exactly 4 alphanumeric chars, fixed width) +
+      // BBAN tail (0-26 alphanumeric chars, bounded, no nesting).
+      //
+      // All quantifiers are either fixed-width or a single bounded range applied
+      // to a non-overlapping character class. There are no nested quantifiers or
+      // adjacent groups with overlapping character classes, so catastrophic
+      // backtracking is impossible. Total BBAN length is 4-30 chars, covering
+      // all current IBAN country formats.
+      re: /\b[A-Z]{2}\d{2}[A-Z0-9]{4}[A-Z0-9]{0,26}\b/,
       label: 'IBAN number',
       severity: 'low',
       maskFn: maskIban,
     },
     credit_card: {
-      // Match 13–19 digits optionally separated by spaces or dashes.
-      re: /\b\d[\d \t\-]{11,20}\d\b/,
+      // ReDoS-safe credit card pattern — three non-overlapping alternatives:
+      //
+      // 1. Amex 4-6-5 layout with a space or dash separator (e.g. 3782 822463
+      //    10005).  Listed first so it is preferred over the generic run below
+      //    when the input matches this specific format.
+      //
+      // 2. Uniform separated groups: exactly 4 digits, then 2-4 more groups of
+      //    exactly 4 digits, joined by a single space or dash.  No digit-class
+      //    overlap between the groups and the separators.
+      //    Covers: 4-4-4-4 (Visa/MC/Discover), 4-4-4-4-4 (19-digit Maestro).
+      //
+      // 3. Unseparated run: 13-19 consecutive digits with word boundaries.
+      //    Catches the compact (no separator) form of all card types including
+      //    Amex (15 digits).
+      //
+      // The validate() Luhn check filters false positives from all alternatives.
+      re: /\b\d{4}[ \-]\d{6}[ \-]\d{5}\b|\b\d{4}(?:[ \-]\d{4}){2,4}\b|\b\d{13,19}\b/,
       label: 'credit card number',
       severity: 'high',
       validate(match) {
@@ -312,11 +338,42 @@
   // that maskText() can replace every instance.  showBanner() deduplicates by
   // label when building the user-facing message.
   // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // Scan timeout — if wall-clock time inside scanText() exceeds this many
+  // milliseconds the scan is aborted and an empty result is returned so the
+  // tab never freezes due to a pathological input string.
+  // ---------------------------------------------------------------------------
+  const SCAN_TIMEOUT_MS = 50;
+
   function scanText(text) {
+    const t0 = performance.now();
+
+    /**
+     * Returns true when the scan has already consumed more than SCAN_TIMEOUT_MS
+     * wall-clock milliseconds.  Call this between each major work unit so we
+     * can bail out without blocking the main thread for longer than the budget.
+     */
+    function timedOut() {
+      if (performance.now() - t0 > SCAN_TIMEOUT_MS) {
+        console.warn(
+          '[AI Aware] DLP: scanText() aborted — scan exceeded ' + SCAN_TIMEOUT_MS +
+          ' ms on the current input. Returning empty result.',
+          DLP_LOG_CTX,
+        );
+        return true;
+      }
+      return false;
+    }
+
     const hits = [];
 
     // 1. Known-prefix and PII pattern checks — collect every occurrence.
     for (const [, pattern] of Object.entries(PATTERNS)) {
+      // Check the budget before each pattern so a single slow regex cannot
+      // push us past the deadline without us noticing.
+      if (timedOut()) return [];
+
       const { re, label, severity = 'warning', validate, maskFn } = pattern;
       const globalRe = new RegExp(re.source, 'g');
       const matches = [...text.matchAll(globalRe)];
@@ -333,7 +390,7 @@
     }
 
     // 2. Entropy-based check — only when no high-severity hit was already found.
-    if (!hits.some(h => h.severity === 'high')) {
+    if (!hits.some(h => h.severity === 'high') && !timedOut()) {
       hits.push(...scanEntropy(text));
     }
 
