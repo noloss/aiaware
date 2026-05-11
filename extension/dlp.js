@@ -582,7 +582,16 @@
   // The callback is wrapped in try/catch so a crash here never silently kills
   // the observer — MutationObserver swallows exceptions after the first one.
   const observer = new MutationObserver(() => {
-    try { findAndAttach(); } catch (err) {
+    try {
+      findAndAttach();
+      // SPA navigation (e.g. "New chat") removes the old input from the DOM.
+      // Hide the banner immediately rather than waiting for the first keystroke.
+      if (activeInputEl && !document.contains(activeInputEl)) {
+        activeInputEl = null;
+        _hasHighAlert = false;
+        hideBanner();
+      }
+    } catch (err) {
       console.error('[AI Aware] DLP: MutationObserver callback error:', err, DLP_LOG_CTX);
     }
   });
