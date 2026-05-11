@@ -216,69 +216,38 @@
   const DISMISS_KEY = 'aa-dlp-dismissed';
 
   // ---------------------------------------------------------------------------
-  // Banner positioning — tracks the input field's live bounding rect.
+  // Banner parent selection — finds the nearest ancestor that can host the
+  // banner as an in-flow child, so the banner pushes the input area up rather
+  // than floating over buttons.
   //
-  // On landing pages (Claude.ai /new, Gemini /app, ChatGPT /) the input lives
-  // inside a centred flex/grid container. Appending the banner as a DOM sibling
-  // breaks that layout; instead the banner is appended to <body> and its
-  // position is driven by the input's bounding rect so it stays directly below
-  // the field regardless of scroll or resize.
-  //
-  // State is kept at module level so hideBanner() can clean up listeners even
-  // when it doesn't have a reference to the original anchorEl.
+  // Strategy: walk up from the input element and return the first ancestor
+  // whose rendered width is at least as wide as the input AND whose display
+  // is flex, grid, or block.  This is the container that owns the input's
+  // layout, so appending the banner there keeps it visually below the input
+  // on both regular chat pages and landing pages.
   // ---------------------------------------------------------------------------
 
-  /** @type {ResizeObserver|null} */
-  let _bannerResizeObs = null;
-  /** @type {(() => void)|null} */
-  let _bannerScrollFn = null;
-
   /**
-   * Position the banner directly below `anchorEl` using fixed coordinates.
-   * Called on first show, on every ResizeObserver tick, and on every scroll.
+   * Return the nearest suitable ancestor container for the DLP banner.
    *
-   * @param {HTMLElement} banner
-   * @param {Element}     anchorEl
+   * @param {Element} inputEl - The monitored input element.
+   * @returns {Element} Ancestor element to appendChild the banner into.
    */
-  function positionBanner(banner, anchorEl) {
-    const rect = anchorEl.getBoundingClientRect();
-    banner.style.left  = rect.left + 'px';
-    banner.style.width = rect.width + 'px';
-    banner.style.top   = (rect.bottom + 4) + 'px';
-    // Clear any CSS-side geometry that could conflict.
-    banner.style.bottom    = '';
-    banner.style.transform = '';
-  }
-
-  /**
-   * Attach ResizeObserver + scroll listener so the banner follows the input.
-   * Cleans up any previous listeners first.
-   *
-   * @param {HTMLElement} banner
-   * @param {Element}     anchorEl
-   */
-  function attachBannerPositioning(banner, anchorEl) {
-    detachBannerPositioning();
-
-    positionBanner(banner, anchorEl);
-
-    _bannerResizeObs = new ResizeObserver(() => positionBanner(banner, anchorEl));
-    _bannerResizeObs.observe(anchorEl);
-    // Use capture:true so nested scrollable containers are also handled.
-    _bannerScrollFn = () => positionBanner(banner, anchorEl);
-    window.addEventListener('scroll', _bannerScrollFn, { passive: true, capture: true });
-  }
-
-  /** Disconnect ResizeObserver and remove the scroll listener. */
-  function detachBannerPositioning() {
-    if (_bannerResizeObs) {
-      _bannerResizeObs.disconnect();
-      _bannerResizeObs = null;
+  function findBannerParent(inputEl) {
+    const inputWidth = inputEl.getBoundingClientRect().width;
+    let el = inputEl.parentElement;
+    while (el && el !== document.body) {
+      const display = getComputedStyle(el).display;
+      if (
+        (display === 'flex' || display === 'grid' || display === 'block') &&
+        el.getBoundingClientRect().width >= inputWidth
+      ) {
+        return el;
+      }
+      el = el.parentElement;
     }
-    if (_bannerScrollFn) {
-      window.removeEventListener('scroll', _bannerScrollFn, { capture: true });
-      _bannerScrollFn = null;
-    }
+    // Fallback: use the form or main landmark that contains the input, or body.
+    return inputEl.closest('form, [role="main"]') ?? document.body;
   }
 
   // ---------------------------------------------------------------------------
@@ -420,6 +389,8 @@
     const tier = TIER_CONFIG[severity] ?? TIER_CONFIG.low;
     const uniqueLabels = [...new Set(hits.map(h => h.label))];
 
+    const parent = findBannerParent(anchorEl);
+
     let banner = document.getElementById(BANNER_ID);
     if (!banner) {
       banner = document.createElement('div');
@@ -433,9 +404,13 @@
         hideBanner();
       });
       banner.appendChild(btn);
-      // Append to <body> so the fixed-position banner is never clipped by a
-      // parent element's overflow or flex layout on any supported platform.
-      document.body.appendChild(banner);
+      // Insert into the input's nearest layout ancestor so the banner
+      // participates in the existing flex/block flow and lifts the input area
+      // up, rather than floating over buttons.
+      parent.appendChild(banner);
+    } else if (banner.parentElement !== parent) {
+      // Re-anchor to the correct container when the active input changes.
+      parent.appendChild(banner);
     }
 
     // Apply exactly one severity modifier class; remove the others.
@@ -451,18 +426,11 @@
     banner.appendChild(dismiss);
     banner.dataset.labels = uniqueLabels.join(', ');
     banner.style.display = 'flex';
-
-    // Position the banner below the active input field and keep it there as
-    // the user resizes the window or scrolls the page.
-    attachBannerPositioning(banner, anchorEl);
   }
 
   function hideBanner() {
     const banner = document.getElementById(BANNER_ID);
     if (banner) banner.style.display = 'none';
-    // Clean up positioning listeners so we don't leak ResizeObserver / scroll
-    // handlers when the banner is dismissed or the input is cleared.
-    detachBannerPositioning();
   }
 
   // ---------------------------------------------------------------------------

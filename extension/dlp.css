@@ -1,14 +1,14 @@
 #aa-dlp-banner {
   all: initial;
-  /* left / top / width are set inline by positionBanner() in dlp.js so the
-     banner tracks the input field on landing pages (centred flex/grid layout)
-     and on regular chat pages alike. position:fixed is the only geometry
-     property that needs to live here. */
-  position: fixed;
+  /* Banner is inserted into the DOM flow (inside the input's ancestor
+     container) so it naturally lifts the input area rather than floating
+     over buttons.  No position:fixed, no JS-driven geometry updates. */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  width: 100%;
+  margin-top: 4px;
   background: #FEF08A;
   color: #854D0E;
   border: 1px solid #EAB308;
@@ -17,9 +17,8 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
   line-height: 1.4;
-  z-index: 2147483646;
   box-sizing: border-box;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 #aa-dlp-banner span {
