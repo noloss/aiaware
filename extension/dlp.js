@@ -237,11 +237,18 @@
     const inputWidth = inputEl.getBoundingClientRect().width;
     let el = inputEl.parentElement;
     while (el && el !== document.body) {
-      const display = getComputedStyle(el).display;
-      if (
-        (display === 'flex' || display === 'grid' || display === 'block') &&
-        el.getBoundingClientRect().width >= inputWidth
-      ) {
+      const style = getComputedStyle(el);
+      const display = style.display;
+      const isFlex  = display === 'flex'  || display === 'inline-flex';
+      const isGrid  = display === 'grid'  || display === 'inline-grid';
+      const isBlock = display === 'block' || display === 'inline-block';
+      // For flex containers only accept column-direction layouts — row-direction
+      // flex would place the banner beside the input rather than below it.
+      const acceptable =
+        isBlock ||
+        isGrid  ||
+        (isFlex && (style.flexDirection === 'column' || style.flexDirection === 'column-reverse'));
+      if (acceptable && el.getBoundingClientRect().width >= inputWidth) {
         return el;
       }
       el = el.parentElement;
