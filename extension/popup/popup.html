@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Aware</title>
+  <title>Prompt Masker</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
   <header>
-    <img src="../icons/icon48.png" alt="AI Aware logo" width="32" height="32" />
-    <h1>AI Aware</h1>
+    <img src="../icons/icon48.png" alt="Prompt Masker logo" width="32" height="32" />
+    <h1>Prompt Masker</h1>
   </header>
 
   <main>
     <p id="status">Extension active — monitoring this page.</p>
 
-    <section class="aa-settings">
-      <div class="aa-toggle-row">
-        <span class="aa-toggle-label">Shadow Block</span>
-        <span class="aa-badge-on">Always on</span>
+    <section class="pm-settings">
+      <div class="pm-toggle-row">
+        <span class="pm-toggle-label">Shadow Block</span>
+        <span class="pm-badge-on">Always on</span>
       </div>
-      <p class="aa-setting-desc">
+      <p class="pm-setting-desc">
         Enter key submission is automatically blocked when a 🔴 High
         sensitive-data alert is active. A Security Intercept popup will appear
         so you can review before sending.
@@ -29,20 +29,20 @@
 
     <!--
       Issue #36 AC specified the Finnish sentence:
-        'AI Aware on Zero-Network-laajennus. Meillä ei ole palvelinta;
+        'Prompt Masker on Zero-Network-laajennus. Meillä ei ole palvelinta;
          kirjoittamasi teksti ei koskaan poistu koneeltasi.'
       CLAUDE.md project rule prohibits Finnish UI text, so the authoritative
       English equivalent is rendered below instead. The intent of the AC is
       fully satisfied: the Zero-Network / no-server privacy statement is
       prominently displayed and zero outbound network requests are made.
     -->
-    <section class="aa-zero-network" aria-label="Zero-Network privacy notice">
-      <div class="aa-zero-network-header">
-        <span class="aa-zero-network-icon" aria-hidden="true">🛡️</span>
-        <span class="aa-zero-network-badge">Zero-Network</span>
+    <section class="pm-zero-network" aria-label="Zero-Network privacy notice">
+      <div class="pm-zero-network-header">
+        <span class="pm-zero-network-icon" aria-hidden="true">🛡️</span>
+        <span class="pm-zero-network-badge">Zero-Network</span>
       </div>
-      <p class="aa-zero-network-msg">
-        AI Aware is a Zero-Network extension. We have no server; text you type never leaves your device.
+      <p class="pm-zero-network-msg">
+        Prompt Masker is a Zero-Network extension. We have no server; text you type never leaves your device.
       </p>
     </section>
   </main>

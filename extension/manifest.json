@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AI Aware",
+  "name": "Prompt Masker",
   "version": "0.1.0",
-  "description": "AI chat DLP guard \u2013 Zero-Network, your data never leaves your device.",
+  "description": "Prompt Masker \u2013 Zero-Network DLP guard. Detects and masks sensitive data before you send to AI.",
 
   "icons": {
     "16":  "icons/icon16.png",
@@ -17,7 +17,7 @@
       "48":  "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "AI Aware"
+    "default_title": "Prompt Masker"
   },
 
   "background": {

@@ -1,13 +1,13 @@
-// highlight.js — Sensitive text highlight engine for AI Aware.
+// highlight.js — Sensitive text highlight engine for Prompt Masker.
 //
-// Two public functions exposed on window.aiAwareHighlight:
+// Two public functions exposed on window.promptMaskerHighlight:
 //
 //   highlightText(el, hits)  — render highlights for the given DLP hits.
 //   clearHighlights(el)      — remove all highlights; plain text is unchanged.
 //
 // Strategy:
 //   contenteditable (Claude.ai, Gemini) — wrap matched text nodes in
-//     <span data-aa-hl="1" class="aa-hl-{severity}"> elements, preserving
+//     <span data-pm-hl="1" class="aa-hl-{severity}"> elements, preserving
 //     the caret position via a character-offset snapshot taken before and
 //     restored after the DOM mutation.
 //
@@ -17,10 +17,10 @@
 //     pointer-events:none so the textarea remains fully interactive.
 
 (() => {
-  if (window.__aiAwareHlLoaded) return;
-  window.__aiAwareHlLoaded = true;
+  if (window.__promptMaskerHlLoaded) return;
+  window.__promptMaskerHlLoaded = true;
 
-  const BACKDROP_ID = 'aa-hl-backdrop';
+  const BACKDROP_ID = 'pm-hl-backdrop';
 
   // ---------------------------------------------------------------------------
   // Escape HTML special characters for safe innerHTML assignment.
@@ -111,13 +111,13 @@
   }
 
   // ---------------------------------------------------------------------------
-  // clearContenteditableHighlights — unwrap every [data-aa-hl] span inside el,
+  // clearContenteditableHighlights — unwrap every [data-pm-hl] span inside el,
   // then normalise adjacent text nodes.  Plain text content is unchanged.
   // ---------------------------------------------------------------------------
   function clearContenteditableHighlights(el) {
     // Snapshot first — querySelectorAll is live against the DOM, and splicing
     // nodes while iterating would miss elements.
-    const spans = Array.from(el.querySelectorAll('[data-aa-hl]'));
+    const spans = Array.from(el.querySelectorAll('[data-pm-hl]'));
     for (const span of spans) {
       const parent = span.parentNode;
       if (!parent) continue;
@@ -180,7 +180,7 @@
         // Highlighted span.
         const span = document.createElement('span');
         span.dataset.aaHl = '1';
-        span.className = `aa-hl-${hit.severity}`;
+        span.className = `pm-hl-${hit.severity}`;
         span.textContent = text.slice(hitStart, hitEnd);
         frag.appendChild(span);
 
@@ -298,8 +298,8 @@
 
     for (const hit of normalized) {
       html += escapeHtml(text.slice(lastIdx, hit.index));
-      const cls = `aa-hl-${escapeHtml(hit.severity)}`;
-      html += `<span data-aa-hl="1" class="${cls}">${escapeHtml(
+      const cls = `pm-hl-${escapeHtml(hit.severity)}`;
+      html += `<span data-pm-hl="1" class="${cls}">${escapeHtml(
         text.slice(hit.index, hit.index + hit.match.length),
       )}</span>`;
       lastIdx = hit.index + hit.match.length;
@@ -309,8 +309,8 @@
     backdrop.innerHTML = html;
 
     // Sync scroll on every textarea scroll event (attached once per element).
-    if (!el._aaHlScrollAttached) {
-      el._aaHlScrollAttached = true;
+    if (!el._pmHlScrollAttached) {
+      el._pmHlScrollAttached = true;
       el.addEventListener('scroll', () => {
         const bd = document.getElementById(BACKDROP_ID);
         if (bd) {
@@ -365,5 +365,5 @@
     }
   }
 
-  window.aiAwareHighlight = { highlightText, clearHighlights };
+  window.promptMaskerHighlight = { highlightText, clearHighlights };
 })();

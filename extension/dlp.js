@@ -1,6 +1,6 @@
 (() => {
-  if (window.__aiAwareDlpLoaded) return;
-  window.__aiAwareDlpLoaded = true;
+  if (window.__promptMaskerDlpLoaded) return;
+  window.__promptMaskerDlpLoaded = true;
 
   // ---------------------------------------------------------------------------
   // Luhn algorithm — returns true when the digit string has a valid check digit.
@@ -238,7 +238,7 @@
     return hits;
   }
 
-  const BANNER_ID = 'aa-dlp-banner';
+  const BANNER_ID = 'pm-dlp-banner';
 
   // Tracks whether the last scan produced a high-severity hit, independently
   // of banner visibility.  Used by isHighBannerActive() so that dismissing the
@@ -357,7 +357,7 @@
     function timedOut() {
       if (performance.now() - t0 > SCAN_TIMEOUT_MS) {
         console.warn(
-          '[AI Aware] DLP: scanText() aborted — scan exceeded ' + SCAN_TIMEOUT_MS +
+          '[Prompt Masker] DLP: scanText() aborted — scan exceeded ' + SCAN_TIMEOUT_MS +
           ' ms on the current input. Returning empty result.',
           DLP_LOG_CTX,
         );
@@ -473,11 +473,11 @@
 
   const TIER_CONFIG = {
     high: {
-      cssClass: 'aa-high',
+      cssClass: 'pm-high',
       buildText: (labels) => `🔴 High – sensitive data detected: ${labels.join(', ')}`,
     },
     medium: {
-      cssClass: 'aa-medium',
+      cssClass: 'pm-medium',
       buildText: () => '🟠 Medium – potentially sensitive data',
     },
     low: {
@@ -503,7 +503,7 @@
       banner.id = BANNER_ID;
       banner.dataset.labels = '';
       const btn = document.createElement('button');
-      btn.id = 'aa-dlp-dismiss';
+      btn.id = 'pm-dlp-dismiss';
       btn.textContent = '✕';
       btn.addEventListener('click', () => {
         hideBanner();
@@ -513,11 +513,11 @@
     }
 
     // Apply exactly one severity modifier class; remove the others.
-    banner.classList.remove('aa-high', 'aa-medium');
+    banner.classList.remove('pm-high', 'pm-medium');
     if (tier.cssClass) banner.classList.add(tier.cssClass);
 
     // Rebuild text content, preserving the dismiss button.
-    const dismiss = banner.querySelector('#aa-dlp-dismiss');
+    const dismiss = banner.querySelector('#pm-dlp-dismiss');
     banner.textContent = '';
     const msg = document.createElement('span');
     msg.textContent = tier.buildText(uniqueLabels);
@@ -559,11 +559,11 @@
         // Render in-field colour highlights so users see exactly which words
         // are risky before they send.  aiAwareHighlight is loaded by
         // highlight.js which is injected before dlp.js.
-        window.aiAwareHighlight?.highlightText(el, hits);
+        window.promptMaskerHighlight?.highlightText(el, hits);
       } else {
         _hasHighAlert = false;
         hideBanner();
-        window.aiAwareHighlight?.clearHighlights(el);
+        window.promptMaskerHighlight?.clearHighlights(el);
       }
     }, DEBOUNCE_MS));
   }
@@ -571,7 +571,7 @@
   // ---------------------------------------------------------------------------
   // Structured logger for DLP diagnostics.
   // ---------------------------------------------------------------------------
-  const DLP_LOG_CTX = { extension: 'AI Aware', module: 'dlp' };
+  const DLP_LOG_CTX = { extension: 'Prompt Masker', module: 'dlp' };
 
   const attached = new WeakSet();
   // Plain counter so we can detect "nothing was ever attached" without iterating
@@ -585,14 +585,14 @@
 
     el.addEventListener('input', () => {
       try { onInput(el); } catch (err) {
-        console.error('[AI Aware] DLP input handler error:', err, DLP_LOG_CTX);
+        console.error('[Prompt Masker] DLP input handler error:', err, DLP_LOG_CTX);
       }
     });
     el.addEventListener('paste', () => {
       // paste fires before input, wait one tick
       setTimeout(() => {
         try { onInput(el); } catch (err) {
-          console.error('[AI Aware] DLP paste handler error:', err, DLP_LOG_CTX);
+          console.error('[Prompt Masker] DLP paste handler error:', err, DLP_LOG_CTX);
         }
       }, 0);
     });
@@ -619,17 +619,17 @@
         // An invalid CSS selector (e.g. after a future refactor) must never
         // propagate — log it and skip this selector silently.
         console.warn(
-          '[AI Aware] DLP: querySelectorAll failed for selector — skipping.',
+          '[Prompt Masker] DLP: querySelectorAll failed for selector — skipping.',
           { ...DLP_LOG_CTX, selector: sel, error: err.message },
         );
         continue;
       }
       for (const el of els) {
-        if (el.closest('#aa-dlp-banner')) continue;
+        if (el.closest('#pm-dlp-banner')) continue;
         try {
           attachToInput(el);
         } catch (err) {
-          console.error('[AI Aware] DLP: attachToInput failed:', err, DLP_LOG_CTX);
+          console.error('[Prompt Masker] DLP: attachToInput failed:', err, DLP_LOG_CTX);
         }
       }
     }
@@ -649,7 +649,7 @@
         hideBanner();
       }
     } catch (err) {
-      console.error('[AI Aware] DLP: MutationObserver callback error:', err, DLP_LOG_CTX);
+      console.error('[Prompt Masker] DLP: MutationObserver callback error:', err, DLP_LOG_CTX);
     }
   });
   observer.observe(document.body, { childList: true, subtree: true });
@@ -665,7 +665,7 @@
   setTimeout(() => {
     if (attachedCount === 0) {
       console.warn(
-        '[AI Aware] DLP: no input fields found — UI may have changed. ' +
+        '[Prompt Masker] DLP: no input fields found — UI may have changed. ' +
         'DLP monitoring is inactive.',
         { ...DLP_LOG_CTX, selectors: INPUT_SELECTORS },
       );
@@ -716,7 +716,7 @@
     }
   }
 
-  const INTERCEPT_OVERLAY_ID = 'aa-intercept-overlay';
+  const INTERCEPT_OVERLAY_ID = 'pm-intercept-overlay';
 
   function closeIntercept() {
     const el = document.getElementById(INTERCEPT_OVERLAY_ID);
@@ -729,29 +729,29 @@
 
     const overlay = document.createElement('div');
     overlay.id = INTERCEPT_OVERLAY_ID;
-    overlay.className = 'aa-overlay';
+    overlay.className = 'pm-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'aa-intercept-title');
+    overlay.setAttribute('aria-labelledby', 'pm-intercept-title');
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeIntercept();
     });
 
     const dialog = document.createElement('div');
-    dialog.className = 'aa-dialog';
+    dialog.className = 'pm-dialog';
 
     const icon = document.createElement('div');
-    icon.className = 'aa-icon';
+    icon.className = 'pm-icon';
     icon.textContent = '🛡️';
     icon.setAttribute('aria-hidden', 'true');
 
     const heading = document.createElement('h2');
-    heading.id = 'aa-intercept-title';
-    heading.className = 'aa-heading';
+    heading.id = 'pm-intercept-title';
+    heading.className = 'pm-heading';
     heading.textContent = 'Security Warning';
 
     const body = document.createElement('p');
-    body.className = 'aa-body';
+    body.className = 'pm-body';
     body.textContent =
       (() => {
         const labels = document.getElementById(BANNER_ID)?.dataset.labels;
@@ -761,24 +761,24 @@
 
     // Corner × close button — dismisses the popup without sending.
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'aa-dialog-close';
+    closeBtn.className = 'pm-dialog-close';
     closeBtn.textContent = '×';
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.addEventListener('click', closeIntercept);
 
     const actions = document.createElement('div');
-    actions.className = 'aa-actions';
+    actions.className = 'pm-actions';
 
     // Primary action — mask sensitive data and send.
     const maskBtn = document.createElement('button');
-    maskBtn.className = 'aa-btn aa-btn-close';
+    maskBtn.className = 'pm-btn pm-btn-close';
     maskBtn.textContent = 'Mask & Send';
     maskBtn.addEventListener('click', () => {
       if (activeInputEl) {
         // Remove highlight spans before rewriting the value so that no
         // <span data-aa-hl> tags are present in the contenteditable when
         // setInputValue() reads or replaces the content.
-        window.aiAwareHighlight?.clearHighlights(activeInputEl);
+        window.promptMaskerHighlight?.clearHighlights(activeInputEl);
         const masked = maskText(getInputText(activeInputEl));
         setInputValue(activeInputEl, masked);
       }
@@ -792,13 +792,13 @@
 
     // Secondary action — send the original unmasked message.
     const sendBtn = document.createElement('button');
-    sendBtn.className = 'aa-btn aa-btn-proceed';
+    sendBtn.className = 'pm-btn pm-btn-proceed';
     sendBtn.textContent = 'Continue anyway';
     sendBtn.addEventListener('click', () => {
       closeIntercept();
       // Strip highlight spans before submitting so the platform never receives
       // raw <span data-aa-hl> tags as part of the message content.
-      if (activeInputEl) window.aiAwareHighlight?.clearHighlights(activeInputEl);
+      if (activeInputEl) window.promptMaskerHighlight?.clearHighlights(activeInputEl);
       clickPlatformSubmit();
     });
 
@@ -865,6 +865,6 @@
   // ---------------------------------------------------------------------------
   // Public API — exposed for use by other extension scripts and tests.
   // ---------------------------------------------------------------------------
-  window.aiAware = { scanText, maskText };
+  window.promptMasker = { scanText, maskText };
 
 })();

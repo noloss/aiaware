@@ -4,7 +4,7 @@
 chrome.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === 'install') {
     chrome.storage.local.set({ initialized: true, version: '0.1.0' });
-    console.log('[AI Aware] Extension installed.');
+    console.log('[Prompt Masker] Extension installed.');
   }
 });
 
@@ -40,12 +40,12 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     try {
       parsed = new URL(message.url);
     } catch {
-      console.error('[AI Aware] openTab rejected: invalid URL', message.url);
+      console.error('[Prompt Masker] openTab rejected: invalid URL', message.url);
       return;
     }
 
     if (BLOCKED_SCHEMES.has(parsed.protocol)) {
-      console.error('[AI Aware] openTab rejected: disallowed scheme', parsed.protocol);
+      console.error('[Prompt Masker] openTab rejected: disallowed scheme', parsed.protocol);
       return;
     }
 

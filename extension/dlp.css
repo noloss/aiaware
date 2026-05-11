@@ -1,4 +1,4 @@
-#aa-dlp-banner {
+#pm-dlp-banner {
   all: initial;
   /* position:fixed so the banner is never clipped by a parent's overflow or
      flex layout. left/top/width are set inline by positionBanner() which
@@ -21,7 +21,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
-#aa-dlp-banner span {
+#pm-dlp-banner span {
   all: initial;
   font-family: inherit;
   font-size: inherit;
@@ -29,7 +29,7 @@
   line-height: inherit;
 }
 
-#aa-dlp-dismiss {
+#pm-dlp-dismiss {
   all: initial;
   cursor: pointer;
   font-size: 14px;
@@ -40,47 +40,47 @@
   line-height: 1;
 }
 
-#aa-dlp-dismiss:hover {
+#pm-dlp-dismiss:hover {
   opacity: 1;
 }
 
 /* Medium-severity variant — orange — shown for password patterns. */
-#aa-dlp-banner.aa-medium {
+#pm-dlp-banner.pm-medium {
   background: #FFEDD5;
   color: #9A3412;
   border-color: #F97316;
 }
 
-#aa-dlp-banner.aa-medium #aa-dlp-dismiss {
+#pm-dlp-banner.pm-medium #pm-dlp-dismiss {
   color: #9A3412;
 }
 
 /* High-severity variant — red — shown for API keys, SSNs, credit cards. */
-#aa-dlp-banner.aa-high {
+#pm-dlp-banner.pm-high {
   background: #FEE2E2;
   color: #991B1B;
   border-color: #EF4444;
 }
 
-#aa-dlp-banner.aa-high #aa-dlp-dismiss {
+#pm-dlp-banner.pm-high #pm-dlp-dismiss {
   color: #991B1B;
 }
 
 /* ── In-field highlight spans ─────────────────────────────────────────────── */
-/* Applied to <span data-aa-hl="1"> elements inside contenteditable inputs
-   and inside the #aa-hl-backdrop overlay that covers textarea inputs.       */
+/* Applied to <span data-pm-hl="1"> elements inside contenteditable inputs
+   and inside the #pm-hl-backdrop overlay that covers textarea inputs.       */
 
-.aa-hl-high {
+.pm-hl-high {
   background: rgba(239, 68, 68, 0.35);   /* red   — API keys, SSN, CC numbers */
   border-radius: 2px;
 }
 
-.aa-hl-medium {
+.pm-hl-medium {
   background: rgba(249, 115, 22, 0.35);  /* orange — password patterns        */
   border-radius: 2px;
 }
 
-.aa-hl-low {
+.pm-hl-low {
   background: rgba(234, 179, 8, 0.35);   /* yellow — email, IBAN              */
   border-radius: 2px;
 }
@@ -90,7 +90,7 @@
    with pointer-events:none; only the span backgrounds are visible because the
    backdrop text colour is transparent (set inline by highlight.js).         */
 
-#aa-hl-backdrop {
+#pm-hl-backdrop {
   /* Geometry and typography are set inline by highlight.js so they always
      match the live computed style of the observed textarea.
      This rule exists as a safe reset in case any host stylesheet leaks in. */

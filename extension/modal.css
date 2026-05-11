@@ -1,10 +1,10 @@
 /* modal.css — Styles for the AI Aware warning overlay.
-   Scoped with the .aa- prefix to avoid collisions with host-page styles.
+   Scoped with the .pm- prefix to avoid collisions with host-page styles.
    All values use explicit units / colours so they are immune to the host's
    CSS custom properties and cascade resets. */
 
 /* ── Overlay (full-screen backdrop) ──────────────────────────────────────── */
-.aa-overlay {
+.pm-overlay {
   all: initial; /* reset any inherited host styles */
   position: fixed;
   inset: 0;
@@ -15,16 +15,16 @@
   background-color: rgba(0, 0, 0, 0.55);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   /* Fade in */
-  animation: aa-fade-in 0.12s ease-out both;
+  animation: pm-fade-in 0.12s ease-out both;
 }
 
-@keyframes aa-fade-in {
+@keyframes pm-fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
 /* ── Dialog box ──────────────────────────────────────────────────────────── */
-.aa-dialog {
+.pm-dialog {
   all: initial;
   position: relative; /* anchor for the corner × button */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -38,11 +38,11 @@
   flex-direction: column;
   gap: 16px;
   /* Slide-up entry */
-  animation: aa-slide-up 0.15s ease-out both;
+  animation: pm-slide-up 0.15s ease-out both;
 }
 
 /* ── Corner × close button ───────────────────────────────────────────────── */
-.aa-dialog-close {
+.pm-dialog-close {
   all: initial;
   position: absolute;
   top: 8px;
@@ -61,30 +61,30 @@
   border-radius: 4px;
 }
 
-.aa-dialog-close:hover {
+.pm-dialog-close:hover {
   opacity: 1;
 }
 
-.aa-dialog-close:focus-visible {
+.pm-dialog-close:focus-visible {
   outline: 3px solid #0078d4;
   outline-offset: 2px;
   opacity: 1;
 }
 
-@keyframes aa-slide-up {
+@keyframes pm-slide-up {
   from { transform: translateY(12px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
 
 /* ── Icon ────────────────────────────────────────────────────────────────── */
-.aa-icon {
+.pm-icon {
   font-size: 36px;
   line-height: 1;
   text-align: center;
 }
 
 /* ── Heading ─────────────────────────────────────────────────────────────── */
-.aa-heading {
+.pm-heading {
   all: initial;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 20px;
@@ -95,7 +95,7 @@
 }
 
 /* ── Body copy ───────────────────────────────────────────────────────────── */
-.aa-body {
+.pm-body {
   all: initial;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
@@ -105,7 +105,7 @@
 }
 
 /* ── URL box ─────────────────────────────────────────────────────────────── */
-.aa-url-box {
+.pm-url-box {
   background: #f5f5f5;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -116,7 +116,7 @@
   overflow: hidden;
 }
 
-.aa-url-label {
+.pm-url-label {
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -125,7 +125,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.aa-url-value {
+.pm-url-value {
   font-size: 13px;
   color: #1a1a1a;
   word-break: break-all;
@@ -133,14 +133,14 @@
 }
 
 /* ── Action buttons ──────────────────────────────────────────────────────── */
-.aa-actions {
+.pm-actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 4px;
 }
 
-.aa-btn {
+.pm-btn {
   all: initial;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
@@ -152,29 +152,29 @@
   white-space: nowrap;
 }
 
-.aa-btn:focus-visible {
+.pm-btn:focus-visible {
   outline: 3px solid #0078d4;
   outline-offset: 2px;
 }
 
 /* "Close" — primary / safe action */
-.aa-btn-close {
+.pm-btn-close {
   background-color: #0f62fe;
   color: #ffffff;
 }
 
-.aa-btn-close:hover {
+.pm-btn-close:hover {
   background-color: #0043ce;
 }
 
 /* "Continue anyway" — secondary / risky action */
-.aa-btn-proceed {
+.pm-btn-proceed {
   background-color: transparent;
   color: #6b6b6b;
   border: 1px solid #d0d0d0;
 }
 
-.aa-btn-proceed:hover {
+.pm-btn-proceed:hover {
   background-color: #f0f0f0;
   color: #1a1a1a;
 }

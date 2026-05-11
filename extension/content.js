@@ -2,8 +2,8 @@
 
 (() => {
   // Guard against double-injection (e.g. same-page navigation in SPAs).
-  if (window.__aiAwareLoaded) return;
-  window.__aiAwareLoaded = true;
+  if (window.__promptMaskerLoaded) return;
+  window.__promptMaskerLoaded = true;
 
   // Defence-in-depth: ensure we only activate on the intended hosts even if
   // Chrome injects this script somewhere unexpected during development.
@@ -11,17 +11,17 @@
   const host = location.hostname;
   if (!SUPPORTED_HOSTS.some(h => host === h || host.endsWith('.' + h))) return;
 
-  console.log('[AI Aware] active on', host);
+  console.log('[Prompt Masker] active on', host);
 
   // ---------------------------------------------------------------------------
   // Structured logger — all diagnostic messages share a common prefix and
   // an 'aiAware' context object so they are easy to filter in DevTools.
   // ---------------------------------------------------------------------------
-  const LOG_CTX = { extension: 'AI Aware', host };
+  const LOG_CTX = { extension: 'Prompt Masker', host };
 
   function warnSelectors(selectors, context) {
     console.warn(
-      '[AI Aware] No elements matched — UI may have changed.',
+      '[Prompt Masker] No elements matched — UI may have changed.',
       { ...LOG_CTX, context, selectors },
     );
   }
@@ -113,11 +113,11 @@
       event.preventDefault();
 
       const url = anchor.href;
-      console.log('[AI Aware] Intercepted link click inside chat response:', url);
+      console.log('[Prompt Masker] Intercepted link click inside chat response:', url);
 
       // Dispatch a custom event so other modules (safety check, warning modal,
       // etc.) can react without coupling to this listener directly.
-      document.dispatchEvent(new CustomEvent('aiaware:linkclick', {
+      document.dispatchEvent(new CustomEvent('promptmasker:linkclick', {
         detail: { url, anchor },
         bubbles: false,
       }));
@@ -125,7 +125,7 @@
       // An unexpected error inside our listener must never propagate as an
       // uncaught exception — that would interfere with the host page's own
       // click handlers running in the same capture phase.
-      console.error('[AI Aware] Unexpected error in click handler:', err, LOG_CTX);
+      console.error('[Prompt Masker] Unexpected error in click handler:', err, LOG_CTX);
     }
   }, /* capture = */ true);
 

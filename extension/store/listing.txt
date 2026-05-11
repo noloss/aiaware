@@ -1,4 +1,4 @@
-# AI Aware — Chrome Web Store Listing Materials
+# Prompt Masker — Chrome Web Store Listing Materials
 # All fields ready for the Developer Dashboard submission form.
 
 # ── SHORT DESCRIPTION (max 132 chars) ────────────────────────────────────────
@@ -6,7 +6,7 @@
 AI chat DLP guard – catches credentials & sensitive data before you hit Send. Zero-Network: data never leaves your device.
 
 # ── DETAILED DESCRIPTION ─────────────────────────────────────────────────────
-AI Aware scans the text you're about to send to AI chat services (Claude, Gemini, ChatGPT) and warns you when it detects sensitive content — AWS keys, passwords, personal data, or prompt-injection patterns.
+Prompt Masker scans the text you're about to send to AI chat services (Claude, Gemini, ChatGPT) and warns you when it detects sensitive content — AWS keys, passwords, personal data, or prompt-injection patterns.
 
 🔴 Security Intercept
 A blocking modal appears for HIGH-risk messages, giving you a chance to review before anything is submitted to the AI.
