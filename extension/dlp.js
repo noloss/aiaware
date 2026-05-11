@@ -220,45 +220,82 @@
   let _hasHighAlert = false;
 
   // ---------------------------------------------------------------------------
-  // Banner parent selection — finds the nearest ancestor that can host the
-  // banner as an in-flow child, so the banner pushes the input area up rather
-  // than floating over buttons.
+  // Banner positioning — fixed, anchored below the entire composer area.
   //
-  // Strategy: walk up from the input element and return the first ancestor
-  // whose rendered width is at least as wide as the input AND whose display
-  // is flex, grid, or block.  This is the container that owns the input's
-  // layout, so appending the banner there keeps it visually below the input
-  // on both regular chat pages and landing pages.
+  // "Composer area" = the ancestor of the input that also contains the send
+  // button(s).  Anchoring to this element (rather than the raw input) means
+  // the banner appears below the toolbar row (Tools / Fast / Send buttons),
+  // not overlapping it.
+  //
+  // State is kept at module level so hideBanner() can clean up listeners even
+  // when it doesn't have a reference to the original anchorEl.
   // ---------------------------------------------------------------------------
 
+  /** @type {ResizeObserver|null} */
+  let _bannerResizeObs = null;
+  /** @type {(() => void)|null} */
+  let _bannerScrollFn = null;
+
   /**
-   * Return the nearest suitable ancestor container for the DLP banner.
+   * Walk up from inputEl and return the first ancestor that also contains a
+   * known send button — i.e. the full composer area including toolbar.
+   * Falls back to the input element itself if no send button is found.
    *
-   * @param {Element} inputEl - The monitored input element.
-   * @returns {Element} Ancestor element to appendChild the banner into.
+   * @param {Element} inputEl
+   * @returns {Element}
    */
-  function findBannerParent(inputEl) {
-    const inputWidth = inputEl.getBoundingClientRect().width;
+  function findComposerEl(inputEl) {
     let el = inputEl.parentElement;
     while (el && el !== document.body) {
-      const style = getComputedStyle(el);
-      const display = style.display;
-      const isFlex  = display === 'flex'  || display === 'inline-flex';
-      const isGrid  = display === 'grid'  || display === 'inline-grid';
-      const isBlock = display === 'block' || display === 'inline-block';
-      // For flex containers only accept column-direction layouts — row-direction
-      // flex would place the banner beside the input rather than below it.
-      const acceptable =
-        isBlock ||
-        isGrid  ||
-        (isFlex && (style.flexDirection === 'column' || style.flexDirection === 'column-reverse'));
-      if (acceptable && el.getBoundingClientRect().width >= inputWidth) {
-        return el;
-      }
+      const hasSend = SUBMIT_SELECTORS.some(sel => {
+        try { return el.querySelector(sel) !== null; } catch { return false; }
+      });
+      if (hasSend) return el;
       el = el.parentElement;
     }
-    // Fallback: use the form or main landmark that contains the input, or body.
-    return inputEl.closest('form, [role="main"]') ?? document.body;
+    return inputEl;
+  }
+
+  /**
+   * Position the banner directly below `anchorEl` using fixed coordinates.
+   *
+   * @param {HTMLElement} banner
+   * @param {Element}     anchorEl
+   */
+  function positionBanner(banner, anchorEl) {
+    const rect = anchorEl.getBoundingClientRect();
+    banner.style.left  = rect.left + 'px';
+    banner.style.width = rect.width + 'px';
+    banner.style.top   = (rect.bottom + 4) + 'px';
+    banner.style.bottom    = '';
+    banner.style.transform = '';
+  }
+
+  /**
+   * Attach ResizeObserver + scroll listener so the banner follows the composer.
+   *
+   * @param {HTMLElement} banner
+   * @param {Element}     anchorEl
+   */
+  function attachBannerPositioning(banner, anchorEl) {
+    detachBannerPositioning();
+    positionBanner(banner, anchorEl);
+    _bannerResizeObs = new ResizeObserver(() => positionBanner(banner, anchorEl));
+    _bannerResizeObs.observe(anchorEl);
+    _bannerScrollFn = () => positionBanner(banner, anchorEl);
+    window.addEventListener('scroll', _bannerScrollFn, { passive: true, capture: true });
+  }
+
+  /** Disconnect ResizeObserver and remove the scroll listener. */
+  function detachBannerPositioning() {
+    if (_bannerResizeObs) {
+      _bannerResizeObs.disconnect();
+      _bannerResizeObs = null;
+    }
+    if (_bannerScrollFn) {
+      window.removeEventListener('scroll', _bannerScrollFn, { capture: true });
+      _bannerScrollFn = null;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -399,7 +436,9 @@
     const tier = TIER_CONFIG[severity] ?? TIER_CONFIG.low;
     const uniqueLabels = [...new Set(hits.map(h => h.label))];
 
-    const parent = findBannerParent(anchorEl);
+    // Anchor to the full composer element (input + buttons) so the banner
+    // appears below the toolbar, not floating over it.
+    const composerEl = findComposerEl(anchorEl);
 
     let banner = document.getElementById(BANNER_ID);
     if (!banner) {
@@ -413,13 +452,7 @@
         hideBanner();
       });
       banner.appendChild(btn);
-      // Insert into the input's nearest layout ancestor so the banner
-      // participates in the existing flex/block flow and lifts the input area
-      // up, rather than floating over buttons.
-      parent.appendChild(banner);
-    } else if (banner.parentElement !== parent) {
-      // Re-anchor to the correct container when the active input changes.
-      parent.appendChild(banner);
+      document.body.appendChild(banner);
     }
 
     // Apply exactly one severity modifier class; remove the others.
@@ -435,11 +468,14 @@
     banner.appendChild(dismiss);
     banner.dataset.labels = uniqueLabels.join(', ');
     banner.style.display = 'flex';
+
+    attachBannerPositioning(banner, composerEl);
   }
 
   function hideBanner() {
     const banner = document.getElementById(BANNER_ID);
     if (banner) banner.style.display = 'none';
+    detachBannerPositioning();
   }
 
   // ---------------------------------------------------------------------------
