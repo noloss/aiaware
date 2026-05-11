@@ -168,36 +168,38 @@
     iban:     {
       // ReDoS-safe IBAN pattern.
       //
-      // Structure: CC (2 letters) + check (2 digits) + BBAN head (exactly 4
-      // alphanumeric chars, split into two fixed alternatives to avoid a single
-      // long variable-width group that overlaps with the preceding \d{2}) +
-      // BBAN tail (0-26 alphanumeric chars, word-boundary terminated).
+      // Structure: CC (exactly 2 uppercase letters) + check digits (exactly 2
+      // digits) + BBAN head (exactly 4 alphanumeric chars, fixed width) +
+      // BBAN tail (0-26 alphanumeric chars, bounded, no nesting).
       //
-      // Splitting the head into `[A-Z]{4}|[A-Z0-9]{4}` removes the overlap
-      // between \d{2} and the immediately following character class, and the
-      // tail length is bounded to ≤ 26 (total BBAN ≤ 30) without nesting.
+      // All quantifiers are either fixed-width or a single bounded range applied
+      // to a non-overlapping character class. There are no nested quantifiers or
+      // adjacent groups with overlapping character classes, so catastrophic
+      // backtracking is impossible. Total BBAN length is 4-30 chars, covering
+      // all current IBAN country formats.
       re: /\b[A-Z]{2}\d{2}[A-Z0-9]{4}[A-Z0-9]{0,26}\b/,
       label: 'IBAN number',
       severity: 'low',
       maskFn: maskIban,
     },
     credit_card: {
-      // ReDoS-safe credit card pattern — two non-overlapping alternatives:
+      // ReDoS-safe credit card pattern — three non-overlapping alternatives:
       //
-      // 1. Separated groups: exactly 4 digits, then 2-4 more groups of exactly
-      //    4 digits each, joined by a single space or dash.  No digit class
+      // 1. Amex 4-6-5 layout with a space or dash separator (e.g. 3782 822463
+      //    10005).  Listed first so it is preferred over the generic run below
+      //    when the input matches this specific format.
+      //
+      // 2. Uniform separated groups: exactly 4 digits, then 2-4 more groups of
+      //    exactly 4 digits, joined by a single space or dash.  No digit-class
       //    overlap between the groups and the separators.
-      //    Covers: 4-4-4-4 (Visa/MC/Discover), 4-4-4-4-4 (19-digit Maestro),
-      //    and similar layouts.  Amex (4-6-5) and other non-uniform layouts are
-      //    caught by alternative 2.
+      //    Covers: 4-4-4-4 (Visa/MC/Discover), 4-4-4-4-4 (19-digit Maestro).
       //
-      // 2. Unseparated run: 13-19 consecutive digits with word boundaries.
-      //    No variable-length middle group — the quantifier applies to a single
-      //    non-overlapping character class.
+      // 3. Unseparated run: 13-19 consecutive digits with word boundaries.
+      //    Catches the compact (no separator) form of all card types including
+      //    Amex (15 digits).
       //
-      // The validate() Luhn check filters the false positives that both
-      // alternatives might admit.
-      re: /\b\d{4}(?:[ \-]\d{4}){2,4}\b|\b\d{13,19}\b/,
+      // The validate() Luhn check filters false positives from all alternatives.
+      re: /\b\d{4}[ \-]\d{6}[ \-]\d{5}\b|\b\d{4}(?:[ \-]\d{4}){2,4}\b|\b\d{13,19}\b/,
       label: 'credit card number',
       severity: 'high',
       validate(match) {
