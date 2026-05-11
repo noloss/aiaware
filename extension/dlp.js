@@ -216,6 +216,72 @@
   const DISMISS_KEY = 'aa-dlp-dismissed';
 
   // ---------------------------------------------------------------------------
+  // Banner positioning — tracks the input field's live bounding rect.
+  //
+  // On landing pages (Claude.ai /new, Gemini /app, ChatGPT /) the input lives
+  // inside a centred flex/grid container. Appending the banner as a DOM sibling
+  // breaks that layout; instead the banner is appended to <body> and its
+  // position is driven by the input's bounding rect so it stays directly below
+  // the field regardless of scroll or resize.
+  //
+  // State is kept at module level so hideBanner() can clean up listeners even
+  // when it doesn't have a reference to the original anchorEl.
+  // ---------------------------------------------------------------------------
+
+  /** @type {ResizeObserver|null} */
+  let _bannerResizeObs = null;
+  /** @type {(() => void)|null} */
+  let _bannerScrollFn = null;
+
+  /**
+   * Position the banner directly below `anchorEl` using fixed coordinates.
+   * Called on first show, on every ResizeObserver tick, and on every scroll.
+   *
+   * @param {HTMLElement} banner
+   * @param {Element}     anchorEl
+   */
+  function positionBanner(banner, anchorEl) {
+    const rect = anchorEl.getBoundingClientRect();
+    banner.style.left  = rect.left + 'px';
+    banner.style.width = rect.width + 'px';
+    banner.style.top   = (rect.bottom + 4) + 'px';
+    // Clear any CSS-side geometry that could conflict.
+    banner.style.bottom    = '';
+    banner.style.transform = '';
+  }
+
+  /**
+   * Attach ResizeObserver + scroll listener so the banner follows the input.
+   * Cleans up any previous listeners first.
+   *
+   * @param {HTMLElement} banner
+   * @param {Element}     anchorEl
+   */
+  function attachBannerPositioning(banner, anchorEl) {
+    detachBannerPositioning();
+
+    positionBanner(banner, anchorEl);
+
+    _bannerResizeObs = new ResizeObserver(() => positionBanner(banner, anchorEl));
+    _bannerResizeObs.observe(anchorEl);
+    // Use capture:true so nested scrollable containers are also handled.
+    _bannerScrollFn = () => positionBanner(banner, anchorEl);
+    window.addEventListener('scroll', _bannerScrollFn, { passive: true, capture: true });
+  }
+
+  /** Disconnect ResizeObserver and remove the scroll listener. */
+  function detachBannerPositioning() {
+    if (_bannerResizeObs) {
+      _bannerResizeObs.disconnect();
+      _bannerResizeObs = null;
+    }
+    if (_bannerScrollFn) {
+      window.removeEventListener('scroll', _bannerScrollFn, { capture: true });
+      _bannerScrollFn = null;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // scanText(text) — returns an array of hit objects for every detected match.
   //
   // Each hit: { label, severity, match, index, maskFn? }
@@ -385,11 +451,18 @@
     banner.appendChild(dismiss);
     banner.dataset.labels = uniqueLabels.join(', ');
     banner.style.display = 'flex';
+
+    // Position the banner below the active input field and keep it there as
+    // the user resizes the window or scrolls the page.
+    attachBannerPositioning(banner, anchorEl);
   }
 
   function hideBanner() {
     const banner = document.getElementById(BANNER_ID);
     if (banner) banner.style.display = 'none';
+    // Clean up positioning listeners so we don't leak ResizeObserver / scroll
+    // handlers when the banner is dismissed or the input is cleared.
+    detachBannerPositioning();
   }
 
   // ---------------------------------------------------------------------------
