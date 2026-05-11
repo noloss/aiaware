@@ -627,6 +627,10 @@
     maskBtn.textContent = 'Mask & Send';
     maskBtn.addEventListener('click', () => {
       if (activeInputEl) {
+        // Remove highlight spans before rewriting the value so that no
+        // <span data-aa-hl> tags are present in the contenteditable when
+        // setInputValue() reads or replaces the content.
+        window.aiAwareHighlight?.clearHighlights(activeInputEl);
         const masked = maskText(getInputText(activeInputEl));
         setInputValue(activeInputEl, masked);
       }
@@ -644,6 +648,9 @@
     sendBtn.textContent = 'Continue anyway';
     sendBtn.addEventListener('click', () => {
       closeIntercept();
+      // Strip highlight spans before submitting so the platform never receives
+      // raw <span data-aa-hl> tags as part of the message content.
+      if (activeInputEl) window.aiAwareHighlight?.clearHighlights(activeInputEl);
       clickPlatformSubmit();
     });
 
