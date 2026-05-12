@@ -556,6 +556,9 @@
       const hits = scanText(text);
       if (hits.length > 0) {
         showBanner(hits, el);
+        // Append a record to the local audit log (no matched text stored).
+        // audit.js is injected before dlp.js and exposes this global.
+        window.promptMaskerAudit?.append(hits);
         // Render in-field colour highlights so users see exactly which words
         // are risky before they send.  aiAwareHighlight is loaded by
         // highlight.js which is injected before dlp.js.
