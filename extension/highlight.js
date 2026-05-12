@@ -7,7 +7,7 @@
 //
 // Strategy:
 //   contenteditable (Claude.ai, Gemini) — wrap matched text nodes in
-//     <span data-pm-hl="1" class="aa-hl-{severity}"> elements, preserving
+//     <span data-pm-hl="1" class="pm-hl-{severity}"> elements, preserving
 //     the caret position via a character-offset snapshot taken before and
 //     restored after the DOM mutation.
 //
@@ -15,12 +15,24 @@
 //     mirrors the textarea's font metrics and renders the full text with
 //     colored <span> backgrounds, then layer it over the textarea with
 //     pointer-events:none so the textarea remains fully interactive.
+//
+// All injected elements are appended to window.__pmShadowRoot (created by
+// shadow-host.js) so they are encapsulated and immune to host-page CSS.
 
 (() => {
   if (window.__promptMaskerHlLoaded) return;
   window.__promptMaskerHlLoaded = true;
 
   const BACKDROP_ID = 'pm-hl-backdrop';
+
+  // Shadow root reference — backdrop lives here, not on document.body.
+  function getSR() {
+    if (!window.__pmShadowRoot) {
+      console.error('[Prompt Masker] highlight.js: shadow root not available.');
+      return document.body;
+    }
+    return window.__pmShadowRoot;
+  }
 
   // ---------------------------------------------------------------------------
   // Escape HTML special characters for safe innerHTML assignment.
@@ -277,11 +289,13 @@
   }
 
   function getOrCreateBackdrop() {
-    let bd = document.getElementById(BACKDROP_ID);
+    const sr = getSR();
+    let bd = sr.getElementById(BACKDROP_ID);
     if (!bd) {
       bd = document.createElement('div');
       bd.id = BACKDROP_ID;
-      document.body.appendChild(bd);
+      // Append into shadow root — not document.body — for style encapsulation.
+      sr.appendChild(bd);
     }
     return bd;
   }
@@ -312,7 +326,7 @@
     if (!el._pmHlScrollAttached) {
       el._pmHlScrollAttached = true;
       el.addEventListener('scroll', () => {
-        const bd = document.getElementById(BACKDROP_ID);
+        const bd = getSR().getElementById(BACKDROP_ID);
         if (bd) {
           bd.scrollTop  = el.scrollTop;
           bd.scrollLeft = el.scrollLeft;
@@ -322,7 +336,7 @@
   }
 
   function clearTextareaHighlights() {
-    const bd = document.getElementById(BACKDROP_ID);
+    const bd = getSR().getElementById(BACKDROP_ID);
     if (bd) bd.remove();
   }
 

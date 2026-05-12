@@ -3,6 +3,19 @@
   window.__promptMaskerDlpLoaded = true;
 
   // ---------------------------------------------------------------------------
+  // Shadow root reference — all extension UI (banner, intercept overlay) is
+  // appended here so host-page CSS cannot bleed in.  shadow-host.js runs first
+  // and guarantees the root is available before this module initialises.
+  // ---------------------------------------------------------------------------
+  function getSR() {
+    if (!window.__pmShadowRoot) {
+      console.error('[Prompt Masker] dlp.js: shadow root not available.');
+      return document.body; // last-resort fallback
+    }
+    return window.__pmShadowRoot;
+  }
+
+  // ---------------------------------------------------------------------------
   // Luhn algorithm — returns true when the digit string has a valid check digit.
   // ---------------------------------------------------------------------------
   function luhn(digits) {
@@ -497,7 +510,8 @@
     // appears below the toolbar, not floating over it.
     const composerEl = findComposerEl(anchorEl);
 
-    let banner = document.getElementById(BANNER_ID);
+    const sr = getSR();
+    let banner = sr.getElementById(BANNER_ID);
     if (!banner) {
       banner = document.createElement('div');
       banner.id = BANNER_ID;
@@ -509,7 +523,8 @@
         hideBanner();
       });
       banner.appendChild(btn);
-      document.body.appendChild(banner);
+      // Append into shadow root — not document.body — for style encapsulation.
+      sr.appendChild(banner);
     }
 
     // Apply exactly one severity modifier class; remove the others.
@@ -530,7 +545,7 @@
   }
 
   function hideBanner() {
-    const banner = document.getElementById(BANNER_ID);
+    const banner = getSR().getElementById(BANNER_ID);
     if (banner) banner.style.display = 'none';
     detachBannerPositioning();
   }
@@ -732,13 +747,15 @@
   const INTERCEPT_OVERLAY_ID = 'pm-intercept-overlay';
 
   function closeIntercept() {
-    const el = document.getElementById(INTERCEPT_OVERLAY_ID);
+    const el = getSR().getElementById(INTERCEPT_OVERLAY_ID);
     if (el) el.remove();
   }
 
   /** Show the Security Intercept popup, giving the user a chance to cancel. */
   function showInterceptPopup() {
     closeIntercept(); // dismiss any stale overlay
+
+    const sr = getSR();
 
     const overlay = document.createElement('div');
     overlay.id = INTERCEPT_OVERLAY_ID;
@@ -767,7 +784,7 @@
     body.className = 'pm-body';
     body.textContent =
       (() => {
-        const labels = document.getElementById(BANNER_ID)?.dataset.labels;
+        const labels = getSR().getElementById(BANNER_ID)?.dataset.labels;
         const detail = labels ? `: ${labels}` : '';
         return `Your message appears to contain sensitive data${detail}. Are you sure you want to send it?`;
       })();
@@ -818,14 +835,15 @@
     actions.append(maskBtn, sendBtn);
     dialog.append(closeBtn, icon, heading, body, actions);
     overlay.appendChild(dialog);
-    document.body.appendChild(overlay);
+    // Append into shadow root — not document.body — for style encapsulation.
+    sr.appendChild(overlay);
 
     maskBtn.focus();
   }
 
   // Close the intercept popup with Escape.
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.getElementById(INTERCEPT_OVERLAY_ID)) {
+    if (e.key === 'Escape' && getSR().getElementById(INTERCEPT_OVERLAY_ID)) {
       e.preventDefault();
       closeIntercept();
     }
