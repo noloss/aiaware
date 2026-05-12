@@ -45,6 +45,15 @@
         Prompt Masker is a Zero-Network extension. We have no server; text you type never leaves your device.
       </p>
     </section>
+
+    <section class="pm-activity" aria-label="Recent Activity">
+      <div class="pm-activity-header">
+        <span class="pm-activity-title">Recent Activity</span>
+        <button id="pm-clear-history" class="pm-btn-clear">Clear history</button>
+      </div>
+      <ul id="pm-activity-list" class="pm-activity-list"></ul>
+      <p id="pm-activity-empty" class="pm-activity-empty">No detections logged yet.</p>
+    </section>
   </main>
 
   <script src="popup.js" type="module"></script>
