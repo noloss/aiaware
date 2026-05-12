@@ -17,6 +17,18 @@ You will receive a GitHub Issue describing a feature to implement. Your job is t
 - Prefer small focused files over one large file
 - Do not break existing functionality — read files before overwriting
 
+## Testing
+
+Always write unit tests for any logic you implement in `extension/`.
+
+- Place tests in `tests/` at the project root (create the directory if it doesn't exist).
+- Use Node's built-in test runner — import from `node:test` and `node:assert`. No npm, no Jest.
+- Name test files `tests/<feature>.test.js`.
+- Each test file should use `import { describe, it } from 'node:test'` and `import assert from 'node:assert'`.
+- Tests must exercise the main acceptance criteria from the issue.
+- If no `tests/` directory exists yet, create a minimal `tests/smoke.test.js` that imports the module under test and asserts basic behavior.
+- Do not ship test files inside `extension/` — they live only in `tests/`.
+
 ## When you are done
 
 Confirm which files you created or modified, and that the extension/ directory is ready.

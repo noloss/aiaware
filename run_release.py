@@ -13,6 +13,8 @@ from framework.github import create_issue, ensure_labels, ensure_milestone, find
 from framework.reviewer import review_pr
 
 MAX_RETRIES = 3
+TEST_COMMAND = ["node", "--test"]
+TEST_TIMEOUT = 120
 
 
 def fetch_release_issues(release_number: str) -> list[dict]:
@@ -90,6 +92,24 @@ def split_issue(issue_number: int) -> list[int]:
     return created
 
 
+def run_tests() -> tuple[bool, str]:
+    """Run the local test suite. Returns (passed, combined output)."""
+    print("\n[tests] Running test suite...")
+    result = subprocess.run(
+        TEST_COMMAND,
+        cwd=Path(__file__).parent,
+        capture_output=True,
+        text=True,
+        timeout=TEST_TIMEOUT,
+    )
+    output = result.stdout + result.stderr
+    passed = result.returncode == 0
+    print(f"[tests] {'PASS' if passed else 'FAIL'} (exit {result.returncode})")
+    if not passed:
+        print(output[-1000:])
+    return passed, output
+
+
 def process_issue(issue_number: int, release_number: str) -> None:
     """Run the full coder → reviewer loop for one issue, splitting if needed."""
     print(f"\n{'='*60}")
@@ -124,6 +144,28 @@ def process_issue(issue_number: int, release_number: str) -> None:
         if not pr_number:
             print(f"Coder produced no PR for issue #{issue_number}, skipping.")
             return
+
+        try:
+            passed, test_output = run_tests()
+        except subprocess.TimeoutExpired:
+            passed, test_output = False, "[tests] Timed out after 120s"
+
+        if not passed:
+            if attempt < MAX_RETRIES:
+                print("\nTests failed — sending output to coder for fixes...")
+                feedback = (
+                    "The test suite failed. Fix the failing tests before finishing.\n\n"
+                    f"Test output (last 2000 chars):\n{test_output[-2000:]}"
+                )
+                pr_number = None
+                continue
+            else:
+                print(
+                    f"\n✗ Issue #{issue_number}: tests still failing after {MAX_RETRIES} attempts. "
+                    f"Review PR #{pr_number} manually.",
+                    file=sys.stderr,
+                )
+                return
 
         verdict, comment = review_pr(pr_number)
 
