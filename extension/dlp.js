@@ -550,6 +550,12 @@
   function onInput(el) {
     activeInputEl = el;
     clearTimeout(debounceTimers.get(el));
+    if (!getInputText(el).trim()) {
+      _hasHighAlert = false;
+      hideBanner();
+      window.promptMaskerHighlight?.clearHighlights(el);
+      return;
+    }
     debounceTimers.set(el, setTimeout(() => {
       debounceTimers.delete(el);
       const text = getInputText(el);
@@ -650,6 +656,10 @@
         activeInputEl = null;
         _hasHighAlert = false;
         hideBanner();
+      } else if (activeInputEl && !getInputText(activeInputEl).trim()) {
+        _hasHighAlert = false;
+        hideBanner();
+        window.promptMaskerHighlight?.clearHighlights(activeInputEl);
       }
     } catch (err) {
       console.error('[Prompt Masker] DLP: MutationObserver callback error:', err, DLP_LOG_CTX);
