@@ -11,47 +11,24 @@
 //                      pointer-events:none on a parent does not prevent descendant
 //                      elements from being hit targets.
 //   shadow root      — open shadow root; all extension UI is appended here.
+//                      Trade-off: mode:'open' means page scripts can reach the
+//                      shadow root via document.getElementById('aa-shadow-host')
+//                      .shadowRoot.  This is acceptable because the extension
+//                      goal is CSS isolation, not JS isolation.  The stored
+//                      window.__pmShadowRoot reference is the canonical access
+//                      path for extension scripts.  Switch to mode:'closed' only
+//                      if JS isolation from host-page scripts becomes a goal.
 //   <style>          — combined modal + DLP CSS injected once, synchronously,
 //                      so styles are always ready before the first UI element appears.
 //
 // Exposes:  window.__pmShadowRoot  (ShadowRoot)
 
-(() => {
-  if (window.__pmShadowRoot) return;
-
-  // ── Shadow host ────────────────────────────────────────────────────────────
-  const host = document.createElement('div');
-  host.id = 'aa-shadow-host';
-  // Full-screen fixed so fixed-position children (overlays, banner) use the
-  // viewport as their containing block.  pointer-events:none makes the host
-  // itself transparent to mouse/touch events.
-  // Note: do NOT add contain:paint — that would make this element a containing
-  // block for position:fixed children, breaking overlay/banner placement.
-  host.style.cssText =
-    'position:fixed;inset:0;pointer-events:none;z-index:2147483647;' +
-    'overflow:visible;';
-
-  // Append to <html> so this works even if <body> is not yet parsed.
-  (document.body ?? document.documentElement).appendChild(host);
-
-  const shadow = host.attachShadow({ mode: 'open' });
-
-  // ── Extension CSS injected into shadow root ────────────────────────────────
-  // Embedding CSS as a <style> string avoids:
-  //  • async loading race conditions (no <link> fetch needed)
-  //  • web_accessible_resources entries in manifest.json
-  //  • any flash of unstyled content on the first modal open
-  //
-  // Keep this string in sync with modal.css and dlp.css.
-  const style = document.createElement('style');
-  style.textContent = PM_COMBINED_CSS;
-  shadow.appendChild(style);
-
-  window.__pmShadowRoot = shadow;
-})();
-
 // ── Combined CSS (modal.css + dlp.css) ────────────────────────────────────────
-// Placed outside the IIFE so the string is parsed once and never re-evaluated.
+// Declared BEFORE the IIFE to avoid a Temporal Dead Zone (TDZ) ReferenceError.
+// `const` bindings are not initialised until their declaration is evaluated;
+// if this string were placed after the IIFE, accessing PM_COMBINED_CSS inside
+// the IIFE (which runs first) would throw ReferenceError and prevent
+// window.__pmShadowRoot from ever being assigned.
 const PM_COMBINED_CSS = /* css */`
 
 /* ==========================================================================
@@ -329,3 +306,39 @@ const PM_COMBINED_CSS = /* css */`
   display: block;
 }
 `;
+
+// ── Shadow host setup ─────────────────────────────────────────────────────────
+// Runs after PM_COMBINED_CSS is fully initialised (no TDZ risk).
+(() => {
+  if (window.__pmShadowRoot) return;
+
+  // Full-screen fixed so fixed-position children (overlays, banner) use the
+  // viewport as their containing block.  pointer-events:none makes the host
+  // itself transparent to mouse/touch events.
+  // Note: do NOT add contain:paint — that would make this element a containing
+  // block for position:fixed children, breaking overlay/banner placement.
+  const host = document.createElement('div');
+  host.id = 'aa-shadow-host';
+  host.style.cssText =
+    'position:fixed;inset:0;pointer-events:none;z-index:2147483647;' +
+    'overflow:visible;';
+
+  // Append to <html> so this works even if <body> is not yet parsed.
+  (document.body ?? document.documentElement).appendChild(host);
+
+  // mode:'open' — CSS isolation is the primary goal here.  See trade-off note
+  // in the file header comment above.
+  const shadow = host.attachShadow({ mode: 'open' });
+
+  // Embedding CSS as a <style> string avoids:
+  //  • async loading race conditions (no <link> fetch needed)
+  //  • web_accessible_resources entries in manifest.json
+  //  • any flash of unstyled content on the first modal open
+  //
+  // Keep this string in sync with modal.css and dlp.css.
+  const style = document.createElement('style');
+  style.textContent = PM_COMBINED_CSS;
+  shadow.appendChild(style);
+
+  window.__pmShadowRoot = shadow;
+})();

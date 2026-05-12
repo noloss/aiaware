@@ -190,8 +190,10 @@
         }
 
         // Highlighted span.
+        // data-pm-hl must match the [data-pm-hl] selector in
+        // clearContenteditableHighlights() so spans can be removed correctly.
         const span = document.createElement('span');
-        span.dataset.aaHl = '1';
+        span.dataset.pmHl = '1';
         span.className = `pm-hl-${hit.severity}`;
         span.textContent = text.slice(hitStart, hitEnd);
         frag.appendChild(span);
