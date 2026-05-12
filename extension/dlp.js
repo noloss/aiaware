@@ -806,7 +806,7 @@
     maskBtn.addEventListener('click', () => {
       if (activeInputEl) {
         // Remove highlight spans before rewriting the value so that no
-        // <span data-aa-hl> tags are present in the contenteditable when
+        // <span data-pm-hl> tags are present in the contenteditable when
         // setInputValue() reads or replaces the content.
         window.promptMaskerHighlight?.clearHighlights(activeInputEl);
         const masked = maskText(getInputText(activeInputEl));
@@ -827,7 +827,7 @@
     sendBtn.addEventListener('click', () => {
       closeIntercept();
       // Strip highlight spans before submitting so the platform never receives
-      // raw <span data-aa-hl> tags as part of the message content.
+      // raw <span data-pm-hl> tags as part of the message content.
       if (activeInputEl) window.promptMaskerHighlight?.clearHighlights(activeInputEl);
       clickPlatformSubmit();
     });

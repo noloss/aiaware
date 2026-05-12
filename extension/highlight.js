@@ -238,7 +238,7 @@
   // Textarea engine (backdrop / mirror technique)
   // ===========================================================================
   //
-  // A <div id="aa-hl-backdrop"> is placed in document.body, positioned with
+  // A <div id="pm-hl-backdrop"> is placed in the shadow root, positioned with
   // position:fixed over the textarea, and given identical typography so that
   // the text it renders aligns pixel-perfectly with the textarea text.
   // The backdrop text is color:transparent; only highlight span backgrounds
