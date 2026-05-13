@@ -902,13 +902,17 @@
     }
     if (!monitoredEl) return;
 
-    activeInputEl = monitoredEl;
     clearTimeout(debounceTimers.get(monitoredEl));
     debounceTimers.delete(monitoredEl);
 
     const clipText = e.clipboardData?.getData('text/plain') ?? '';
 
     if (!clipText.trim()) {
+      // Clipboard was empty (e.g. image paste, or browser withheld access).
+      // The element's own `input` event will fire after the DOM update and
+      // trigger the debounced scan — no explicit fallback needed on most
+      // platforms. The setTimeout below covers edge cases where the input
+      // event is suppressed (e.g. programmatic paste on some browsers).
       setTimeout(() => {
         try { onInput(monitoredEl); } catch (err) {
           console.error('[Prompt Masker] DLP paste handler error:', err, DLP_LOG_CTX);
@@ -916,6 +920,8 @@
       }, 0);
       return;
     }
+
+    activeInputEl = monitoredEl;
 
     const hits = scanText(clipText);
     if (hits.length > 0) {
