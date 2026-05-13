@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Prompt Masker",
   "version": "0.1.0",
-  "description": "Prompt Masker \u2013 Zero-Network DLP guard. Detects and masks sensitive data before you send to AI.",
+  "description": "Shield your data from AI leaks. Hide private info in ChatGPT, Gemini and Claude.",
 
   "icons": {
     "16":  "icons/icon16.png",
@@ -39,7 +39,7 @@
         "*://chatgpt.com/*"
       ],
       "js": ["shadow-host.js", "content.js", "modal.js", "highlight.js", "audit.js", "dlp.js"],
-      "run_at": "document_idle"
+      "run_at": "document_end"
     }
   ],
 
