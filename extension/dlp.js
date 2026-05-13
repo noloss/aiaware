@@ -258,6 +258,11 @@
   // banner (visual-only) does not suppress the Send intercept popup.
   let _hasHighAlert = false;
 
+  // Timestamp of the last paste that produced sensitive hits.  Used to prevent
+  // onInput() from clearing the banner when Gemini fires a spurious input event
+  // (with still-empty element value) immediately after processing a paste.
+  let _lastPasteTime = 0;
+
   // ---------------------------------------------------------------------------
   // Banner positioning — fixed, anchored below the entire composer area.
   //
@@ -284,15 +289,53 @@
    * @returns {Element}
    */
   function findComposerEl(inputEl) {
+    let found = inputEl;
+    let foundPass = 'none';
+
+    // Pass 1: exact known selectors — fast path covering ChatGPT and Gemini.
     let el = inputEl.parentElement;
     while (el && el !== document.body) {
       const hasSend = SUBMIT_SELECTORS.some(sel => {
         try { return el.querySelector(sel) !== null; } catch { return false; }
       });
-      if (hasSend) return el;
+      if (hasSend) { found = el; foundPass = 'pass1'; break; }
       el = el.parentElement;
     }
-    return inputEl;
+
+    // Pass 2: case-insensitive aria-label fallback — covers Claude.ai where the
+    // send button label drifts between releases.
+    if (found === inputEl) {
+      el = inputEl.parentElement;
+      while (el && el !== document.body) {
+        const hasSend = [...el.querySelectorAll('button[aria-label]')].some(
+          btn => /send/i.test(btn.getAttribute('aria-label'))
+        );
+        if (hasSend) { found = el; foundPass = 'pass2'; break; }
+        el = el.parentElement;
+      }
+    }
+
+    // Walk up one more level if the parent has a small amount of extra space
+    // below the found element — this catches outer card containers (e.g.
+    // Claude.ai's rounded card has m-3.5 padding below the inner toolbar div).
+    if (found !== inputEl) {
+      const parentEl = found.parentElement;
+      if (parentEl && parentEl !== document.body) {
+        const gap = parentEl.getBoundingClientRect().bottom -
+                    found.getBoundingClientRect().bottom;
+        console.log('[PM] findComposerEl gap check — gap:', gap, 'found:', found.tagName, found.className.slice(0, 60));
+        if (gap > 4 && gap < 50) { found = parentEl; foundPass += '+outer'; }
+      }
+    }
+
+    const r = found.getBoundingClientRect();
+    console.log('[PM] findComposerEl result —', foundPass,
+      '\n  element:', found.tagName, found.className.slice(0, 80),
+      '\n  rect: top', r.top.toFixed(0), 'bottom', r.bottom.toFixed(0),
+      'height', r.height.toFixed(0),
+      '\n  viewport height:', window.innerHeight,
+      '\n  banner will appear at top:', (r.bottom + 4).toFixed(0));
+    return found;
   }
 
   /**
@@ -308,6 +351,9 @@
     banner.style.top   = (rect.bottom + 4) + 'px';
     banner.style.bottom    = '';
     banner.style.transform = '';
+    console.log('[PM] positionBanner — anchorEl:', anchorEl.tagName, anchorEl.className.slice(0, 60),
+      '\n  rect.bottom:', rect.bottom.toFixed(0), '→ banner top:', (rect.bottom + 4).toFixed(0),
+      'viewport:', window.innerHeight);
   }
 
   /**
@@ -566,6 +612,10 @@
     activeInputEl = el;
     clearTimeout(debounceTimers.get(el));
     if (!getInputText(el).trim()) {
+      // Skip the clear if a paste with hits just ran — Gemini fires an `input`
+      // event before syncing the element value, which would erase the banner
+      // the paste handler just showed.
+      if (Date.now() - _lastPasteTime < 1000) return;
       _hasHighAlert = false;
       hideBanner();
       window.promptMaskerHighlight?.clearHighlights(el);
@@ -585,6 +635,9 @@
         // highlight.js which is injected before dlp.js.
         window.promptMaskerHighlight?.highlightText(el, hits);
       } else {
+        // Don't clear the alert if a paste with hits just ran — Gemini's element
+        // may store text in a form scanText can't read, causing a false no-hits result.
+        if (Date.now() - _lastPasteTime < 1000) return;
         _hasHighAlert = false;
         hideBanner();
         window.promptMaskerHighlight?.clearHighlights(el);
@@ -612,6 +665,7 @@
         console.error('[Prompt Masker] DLP input handler error:', err, DLP_LOG_CTX);
       }
     });
+    el.addEventListener('focus', () => { activeInputEl = el; });
   }
 
   const INPUT_SELECTORS = [
@@ -654,7 +708,7 @@
   // Observe DOM for late-loading input fields (Gemini SPA).
   // The callback is wrapped in try/catch so a crash here never silently kills
   // the observer — MutationObserver swallows exceptions after the first one.
-  const observer = new MutationObserver(() => {
+  const observer = new MutationObserver((mutations) => {
     try {
       findAndAttach();
       // SPA navigation (e.g. "New chat") removes the old input from the DOM.
@@ -664,9 +718,18 @@
         _hasHighAlert = false;
         hideBanner();
       } else if (activeInputEl && !getInputText(activeInputEl).trim()) {
-        _hasHighAlert = false;
-        hideBanner();
-        window.promptMaskerHighlight?.clearHighlights(activeInputEl);
+        // Only hide when the mutation directly affected our monitored element.
+        // Checking this avoids false positives on Gemini, where pasted content
+        // lands in a shadow-DOM contenteditable that is separate from the element
+        // we're attached to — those mutations must not clear the banner.
+        const affected = mutations.some(
+          m => m.target === activeInputEl || activeInputEl.contains(m.target)
+        );
+        if (affected) {
+          _hasHighAlert = false;
+          hideBanner();
+          window.promptMaskerHighlight?.clearHighlights(activeInputEl);
+        }
       }
     } catch (err) {
       console.error('[Prompt Masker] DLP: MutationObserver callback error:', err, DLP_LOG_CTX);
@@ -711,6 +774,7 @@
     'button[aria-label="Send message"]',
     // Claude.ai
     'button[aria-label="Send Message"]',
+    'button[aria-label="Send message"]',
     // Gemini
     'button.send-button',
     'button[aria-label="Send"]',
@@ -841,16 +905,26 @@
     }
   }, /* capture = */ true);
 
-  // Capture-phase listener so we run before the platform's own submit handler.
-  document.addEventListener('keydown', (e) => {
+  // Window-level capture so we run before any document-level handlers registered
+  // by the host page (e.g. Gemini registers before our document_idle content script).
+  window.addEventListener('keydown', (e) => {
     // Only plain Enter triggers submission; Shift+Enter is a newline.
     if (e.key !== 'Enter' || e.shiftKey || e.ctrlKey || e.metaKey) return;
     if (!isHighBannerActive()) return;
 
     const target = /** @type {Element} */ (e.target);
     if (!(target instanceof Element)) return;
-    // Only intercept inputs that DLP is actively monitoring.
-    if (!attached.has(target)) return;
+
+    // Use the same 3-step fallback as the paste handler to handle shadow-DOM
+    // retargeting on Gemini (keydown target is the shadow host, not our element).
+    let isMonitored = attached.has(target);
+    if (!isMonitored) {
+      isMonitored = e.composedPath().some(n => n instanceof Element && attached.has(n));
+    }
+    if (!isMonitored && activeInputEl && document.contains(activeInputEl)) {
+      isMonitored = true;
+    }
+    if (!isMonitored) return;
 
     e.preventDefault();
     e.stopImmediatePropagation();
@@ -862,21 +936,27 @@
   // that mouse-driven submission is also protected when a 🔴 High alert is
   // active.
   // ---------------------------------------------------------------------------
-  document.addEventListener('click', (e) => {
+  // Window-level capture so we run before document-level page handlers.
+  window.addEventListener('click', (e) => {
     // Allow the programmatic re-click from "Send anyway" to pass through.
     if (_bypassSendClick) {
       _bypassSendClick = false;
       return;
     }
-
     if (!isHighBannerActive()) return;
 
     const target = /** @type {Element} */ (e.target);
     if (!(target instanceof Element)) return;
 
     // Check whether the click landed on (or inside) a recognised send button.
+    // Also walk composedPath to handle send buttons inside shadow DOMs.
     const isSendButton = SUBMIT_SELECTORS.some(sel => {
       try { return target.closest(sel) !== null; } catch { return false; }
+    }) || e.composedPath().some(node => {
+      if (!(node instanceof Element)) return false;
+      return SUBMIT_SELECTORS.some(sel => {
+        try { return node.matches(sel); } catch { return false; }
+      });
     });
     if (!isSendButton) return;
 
@@ -895,10 +975,29 @@
   // ---------------------------------------------------------------------------
   document.addEventListener('paste', (e) => {
     let monitoredEl = null;
-    let node = e.target instanceof Element ? e.target : null;
-    while (node instanceof Element) {
-      if (attached.has(node)) { monitoredEl = node; break; }
-      node = node.parentElement;
+
+    // Step 1: document.activeElement — works when the platform focuses our
+    // monitored element directly on click (covers most cases).
+    const active = document.activeElement;
+    if (active instanceof Element && attached.has(active)) {
+      monitoredEl = active;
+    }
+
+    // Step 2: composedPath — catches shadow-DOM targets where activeElement
+    // is retargeted to the shadow host rather than our monitored element.
+    if (!monitoredEl) {
+      for (const node of e.composedPath()) {
+        if (node instanceof Element && attached.has(node)) {
+          monitoredEl = node;
+          break;
+        }
+      }
+    }
+
+    // Step 3: last known active input — covers Gemini where neither
+    // activeElement nor composedPath resolves to a monitored element.
+    if (!monitoredEl && activeInputEl && document.contains(activeInputEl)) {
+      monitoredEl = activeInputEl;
     }
     if (!monitoredEl) return;
 
@@ -926,6 +1025,7 @@
     const hits = scanText(clipText);
     if (hits.length > 0) {
       showBanner(hits, monitoredEl);
+      _lastPasteTime = Date.now();
       window.promptMaskerAudit?.append(hits);
       requestAnimationFrame(() => {
         try {
