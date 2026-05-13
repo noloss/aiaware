@@ -612,8 +612,43 @@
         console.error('[Prompt Masker] DLP input handler error:', err, DLP_LOG_CTX);
       }
     });
-    el.addEventListener('paste', () => {
-      // paste fires before input, wait one tick
+    el.addEventListener('paste', (e) => {
+      // Read clipboard text synchronously from the event — before the browser
+      // inserts pasted content into the DOM.  This is essential for ProseMirror-
+      // style contenteditable editors (Gemini, Claude.ai) where the `input` event
+      // may not fire until after the user takes another action (e.g. a keypress),
+      // creating a window in which the user could click Send without ever seeing
+      // the warning banner.
+      const clipText = e.clipboardData?.getData('text/plain') ?? '';
+
+      if (clipText.trim()) {
+        const hits = scanText(clipText);
+        if (hits.length > 0) {
+          // Immediately show the banner — no debounce, no tick delay.
+          activeInputEl = el;
+          // Cancel any pending debounced scan so it cannot overwrite the
+          // immediate result a few hundred milliseconds later.
+          clearTimeout(debounceTimers.get(el));
+          debounceTimers.delete(el);
+          showBanner(hits, el);
+          window.promptMaskerAudit?.append(hits);
+          // Apply in-field highlights once the pasted text is in the DOM.
+          // execCommand / insertText (used by Gemini's ProseMirror) is
+          // synchronous, so one requestAnimationFrame is sufficient.
+          requestAnimationFrame(() => {
+            try {
+              window.promptMaskerHighlight?.highlightText(el, hits);
+            } catch (err) {
+              console.error('[Prompt Masker] DLP paste highlight error:', err, DLP_LOG_CTX);
+            }
+          });
+          return; // Banner already shown; skip the debounced follow-up.
+        }
+      }
+
+      // No sensitive data in the pasted text (or clipboard was empty).
+      // Run the standard debounced scan after the DOM has been updated so any
+      // pre-existing sensitive content in the field is still evaluated.
       setTimeout(() => {
         try { onInput(el); } catch (err) {
           console.error('[Prompt Masker] DLP paste handler error:', err, DLP_LOG_CTX);
