@@ -13,8 +13,24 @@ from framework.github import create_issue, ensure_labels, ensure_milestone, find
 from framework.reviewer import review_pr
 
 MAX_RETRIES = 3
-TEST_COMMAND = ["node", "--test"]
 TEST_TIMEOUT = 120
+
+
+def _resolve_node() -> str:
+    """Return the path to the node binary, falling back to nvm-managed installs."""
+    import shutil
+    found = shutil.which("node")
+    if found:
+        return found
+    nvm_dir = Path.home() / ".nvm" / "versions" / "node"
+    if nvm_dir.is_dir():
+        candidates = sorted(nvm_dir.glob("*/bin/node"), reverse=True)
+        if candidates:
+            return str(candidates[0])
+    raise FileNotFoundError(
+        "node not found on PATH and no nvm-managed install detected. "
+        "Install Node.js 18+ or add it to PATH."
+    )
 
 
 def fetch_release_issues(release_number: str) -> list[dict]:
@@ -96,7 +112,7 @@ def run_tests() -> tuple[bool, str]:
     """Run the local test suite. Returns (passed, combined output)."""
     print("\n[tests] Running test suite...")
     result = subprocess.run(
-        TEST_COMMAND,
+        [_resolve_node(), "--test"],
         cwd=Path(__file__).parent,
         capture_output=True,
         text=True,
