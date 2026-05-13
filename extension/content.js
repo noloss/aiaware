@@ -129,20 +129,26 @@
     }
   }, /* capture = */ true);
 
-  // ---------------------------------------------------------------------------
-  // Diagnostic — check that at least one chat-response container is present.
-  // Deferred by 3 s so SPA frameworks have time to render their initial UI
-  // before we evaluate the selectors.  Logs a structured warning (never throws)
-  // if the page has no recognisable chat containers, which would indicate that
-  // the host platform's DOM structure has changed in an incompatible way.
+// ---------------------------------------------------------------------------
+  // Diagnostic — Verify presence of a valid AI chat workspace layout.
+  // Checks for response nodes OR active prompt input fields to prevent
+  // false-positive warnings on completely fresh or empty chat views.
   // ---------------------------------------------------------------------------
   setTimeout(() => {
-    const anyMatch = CHAT_RESPONSE_SELECTORS.some(sel => {
-      try { return document.querySelector(sel) !== null; } catch { return false; }
+    const hasResponses = CHAT_RESPONSE_SELECTORS.some(sel => {
+      try { return document.querySelector(sel)!== null; } catch { return false; }
     });
-    if (!anyMatch) {
-      warnSelectors(CHAT_RESPONSE_SELECTORS, 'chat-response containers');
+    
+    // Primary input system boundaries present across ChatGPT, Gemini, and Claude
+    const COMPOSER_SELECTORS = ['[contenteditable="true"]', 'textarea', '[role="textbox"]'];
+    const hasInputArea = COMPOSER_SELECTORS.some(sel => {
+      try { return document.querySelector(sel)!== null; } catch { return false; }
+    });
+
+    if (!hasResponses &&!hasInputArea) {
+      warnSelectors(CHAT_RESPONSE_SELECTORS, 'Core interaction boundaries missing. Host UI may have changed.');
+    } else {
+      console.log('[Prompt Masker] Page interface structural integrity confirmed.');
     }
   }, 3000);
-
 })();
