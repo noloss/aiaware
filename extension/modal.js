@@ -1,12 +1,25 @@
 // modal.js — Warning modal for intercepted link clicks.
 // Listens for the 'promptmasker:linkclick' custom event fired by content.js
-// and renders an educational overlay.  Navigation is already cancelled by
-// content.js before this module receives the event.
+// and renders an educational overlay inside the shadow root created by
+// shadow-host.js.  Navigation is already cancelled by content.js before this
+// module receives the event.
 
 (() => {
-  // Guard: this module should only be initialised once per page.
   if (window.__promptMaskerModalLoaded) return;
   window.__promptMaskerModalLoaded = true;
+
+  // ---------------------------------------------------------------------------
+  // Shadow root reference — all extension UI is appended here so that host-page
+  // CSS cannot affect it.  shadow-host.js runs first and guarantees the root
+  // is available by the time this module initialises.
+  // ---------------------------------------------------------------------------
+  function getSR() {
+    if (!window.__pmShadowRoot) {
+      console.error('[Prompt Masker] modal.js: shadow root not available.');
+      return document.body; // last-resort fallback
+    }
+    return window.__pmShadowRoot;
+  }
 
   // ---------------------------------------------------------------------------
   // DOM helpers
@@ -15,9 +28,7 @@
   /** @type {HTMLElement|null} Currently open overlay element. */
   let activeOverlay = null;
 
-  /**
-   * Close and remove the active modal, if one exists.
-   */
+  /** Close and remove the active modal, if one exists. */
   function closeModal() {
     if (!activeOverlay) return;
     activeOverlay.remove();
@@ -30,8 +41,9 @@
    * @param {string} url - The intercepted link destination.
    */
   function showModal(url) {
-    // Dismiss any previously open modal before creating a new one.
-    closeModal();
+    closeModal(); // dismiss any previously open modal
+
+    const sr = getSR();
 
     // ── Overlay (full-screen backdrop) ──────────────────────────────────────
     const overlay = document.createElement('div');
@@ -40,7 +52,6 @@
     overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-labelledby', 'pm-modal-title');
 
-    // Clicking directly on the backdrop (not on the dialog) also closes.
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) closeModal();
     });
@@ -109,11 +120,12 @@
     // ── Assemble ─────────────────────────────────────────────────────────────
     dialog.append(icon, heading, body, urlBox, actions);
     overlay.appendChild(dialog);
-    document.body.appendChild(overlay);
+
+    // Append into shadow root — not document.body — for style encapsulation.
+    sr.appendChild(overlay);
 
     activeOverlay = overlay;
 
-    // Focus the close button so keyboard users can immediately act.
     closeBtn.focus();
   }
 
