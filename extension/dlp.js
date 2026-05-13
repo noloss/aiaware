@@ -290,7 +290,6 @@
    */
   function findComposerEl(inputEl) {
     let found = inputEl;
-    let foundPass = 'none';
 
     // Pass 1: exact known selectors — fast path covering ChatGPT and Gemini.
     let el = inputEl.parentElement;
@@ -298,7 +297,7 @@
       const hasSend = SUBMIT_SELECTORS.some(sel => {
         try { return el.querySelector(sel) !== null; } catch { return false; }
       });
-      if (hasSend) { found = el; foundPass = 'pass1'; break; }
+      if (hasSend) { found = el; break; }
       el = el.parentElement;
     }
 
@@ -310,7 +309,7 @@
         const hasSend = [...el.querySelectorAll('button[aria-label]')].some(
           btn => /send/i.test(btn.getAttribute('aria-label'))
         );
-        if (hasSend) { found = el; foundPass = 'pass2'; break; }
+        if (hasSend) { found = el; break; }
         el = el.parentElement;
       }
     }
@@ -323,18 +322,10 @@
       if (parentEl && parentEl !== document.body) {
         const gap = parentEl.getBoundingClientRect().bottom -
                     found.getBoundingClientRect().bottom;
-        console.log('[PM] findComposerEl gap check — gap:', gap, 'found:', found.tagName, found.className.slice(0, 60));
-        if (gap > 4 && gap < 50) { found = parentEl; foundPass += '+outer'; }
+        if (gap > 4 && gap < 50) found = parentEl;
       }
     }
 
-    const r = found.getBoundingClientRect();
-    console.log('[PM] findComposerEl result —', foundPass,
-      '\n  element:', found.tagName, found.className.slice(0, 80),
-      '\n  rect: top', r.top.toFixed(0), 'bottom', r.bottom.toFixed(0),
-      'height', r.height.toFixed(0),
-      '\n  viewport height:', window.innerHeight,
-      '\n  banner will appear at top:', (r.bottom + 4).toFixed(0));
     return found;
   }
 
@@ -351,9 +342,6 @@
     banner.style.top   = (rect.bottom + 4) + 'px';
     banner.style.bottom    = '';
     banner.style.transform = '';
-    console.log('[PM] positionBanner — anchorEl:', anchorEl.tagName, anchorEl.className.slice(0, 60),
-      '\n  rect.bottom:', rect.bottom.toFixed(0), '→ banner top:', (rect.bottom + 4).toFixed(0),
-      'viewport:', window.innerHeight);
   }
 
   /**
@@ -588,6 +576,19 @@
     banner.style.display = 'flex';
 
     attachBannerPositioning(banner, composerEl);
+
+    // Claude.ai only renders the send button after text appears in the input,
+    // so the first paste may find no send button and fall back to the raw input
+    // element as the anchor.  Retry once after a short delay — by then React
+    // will have rendered the button and findComposerEl can pick the right ancestor.
+    if (composerEl === anchorEl) {
+      setTimeout(() => {
+        const b2 = getSR().getElementById(BANNER_ID);
+        if (!b2 || b2.style.display === 'none') return;
+        const betterEl = findComposerEl(anchorEl);
+        if (betterEl !== anchorEl) attachBannerPositioning(b2, betterEl);
+      }, 400);
+    }
   }
 
   function hideBanner() {
