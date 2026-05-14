@@ -84,16 +84,16 @@
 /* ── Action button row ───────────────────────────────────────────────────── */
 .pm-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
 }
 
 /* ── Base button ─────────────────────────────────────────────────────────── */
 .pm-btn {
-  all: unset;
+  all: initial;
   box-sizing: border-box;
-  display: block;
-  width: 100%;
+  flex: 1;
+  pointer-events: auto;
   padding: 10px 16px;
   border-radius: 6px;
   font-size: 13px;
@@ -109,14 +109,14 @@
 
 /* ── Primary action: Mask & Send ─────────────────────────────────────────── */
 .pm-btn-close {
-  background: #EF4444;
+  background: #4F46E5;
   color: #fff;
-  border: 1px solid #DC2626;
+  border: 1px solid #4338CA;
 }
 
 /* ── Secondary action: Continue anyway ──────────────────────────────────── */
 .pm-btn-proceed {
   background: #F3F4F6;
-  color: #374151;
+  color: #4F46E5;
   border: 1px solid #D1D5DB;
 }
