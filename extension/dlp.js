@@ -177,7 +177,13 @@
       maskFn: maskSsn,
     },
     email:    { re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/, label: 'email address',    severity: 'low',  maskFn: maskEmail },
-    password: { re: /(?:password|passwd|pwd|salasana)\s*[:=]\s*\S+/i,     label: 'password pattern', severity: 'medium' },
+    // ReDoS-safe password pattern.
+    //
+    // The value capture (\S{1,200}) is bounded so that a pathological input
+    // string of hundreds of consecutive non-whitespace characters cannot cause
+    // catastrophic backtracking.  The lower bound of 1 means that a bare
+    // "password:" with no value after the delimiter produces no match.
+    password: { re: /(?:password|passwd|pwd|salasana)\s*[:=]\s*\S{1,200}/i, label: 'password pattern', severity: 'medium' },
     iban:     {
       // ReDoS-safe IBAN pattern.
       //
