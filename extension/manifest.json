@@ -38,7 +38,7 @@
         "*://chat.openai.com/*",
         "*://chatgpt.com/*"
       ],
-      "js": ["shadow-host.js", "content.js", "modal.js", "audit.js", "dlp.js"],
+      "js": ["shadow-host.js", "audit.js", "dlp.js"],
       "run_at": "document_end"
     }
   ],
