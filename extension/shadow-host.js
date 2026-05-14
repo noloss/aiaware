@@ -184,7 +184,7 @@ const PM_COMBINED_CSS = /* css */`
   cursor: pointer;
   transition: background-color 0.12s ease, opacity 0.12s ease;
   white-space: nowrap;
-  flex: 0 25%;
+  flex: 0 35%;
   text-align: center;
 }
 
