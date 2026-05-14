@@ -143,6 +143,7 @@ const PM_COMBINED_CSS = /* css */`
   box-sizing: border-box;
   text-align: center;
   color: #111;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* ── Shield icon ─────────────────────────────────────────────────────────── */
@@ -203,6 +204,7 @@ const PM_COMBINED_CSS = /* css */`
   pointer-events: auto;
   padding: 10px 16px;
   border-radius: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
   font-weight: 600;
   text-align: center;
