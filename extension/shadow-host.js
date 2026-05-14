@@ -105,6 +105,15 @@ const PM_COMBINED_CSS = /* css */`
 /* ==========================================================================
    src/modal.css — Security Intercept overlay styles.
    ========================================================================== */
+/* modal.css — Security Intercept overlay styles.
+ *
+ * These rules style the popup built by showInterceptPopup() in dlp.js.
+ * All selectors use the pm- prefix for isolation.
+ *
+ * NOTE: This file is mirrored into the PM_COMBINED_CSS string in shadow-host.js
+ * so the shadow root always has the styles available synchronously.
+ * Keep both copies in sync when making changes.
+ */
 
 /* ── Full-screen semi-transparent backdrop ───────────────────────────────── */
 .pm-overlay {
@@ -218,7 +227,6 @@ const PM_COMBINED_CSS = /* css */`
   color: #4F46E5;
   border: 1px solid #D1D5DB;
 }
-
 `;
 
 // ── Shadow host setup ─────────────────────────────────────────────────────────
