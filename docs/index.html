@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt Masker — Shield your data from AI leaks</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f0f1a;
+      color: #e0e7ff;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #1E1B4B, #4F46E5, #4338CA);
+      padding: 56px 24px 64px;
+      text-align: center;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .header-logo svg { width: 48px; height: 48px; }
+
+    .header-logo h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #E0E7FF;
+      opacity: 0.95;
+      margin-bottom: 32px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      background: #fff;
+      color: #4F46E5;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px 36px;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .cta-btn:hover {
+      background: #E0E7FF;
+    }
+
+    /* ── Hero visual ── */
+    .hero {
+      display: flex;
+      justify-content: center;
+      padding: 56px 24px 0;
+    }
+
+    .hero svg {
+      max-width: 900px;
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    }
+
+    /* ── Features ── */
+    .features {
+      max-width: 960px;
+      margin: 64px auto 0;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #1a1a2e;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 28px 24px;
+    }
+
+    .card-icon {
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: #a5b4fc;
+      line-height: 1.6;
+    }
+
+    /* ── How it works ── */
+    .how {
+      max-width: 600px;
+      margin: 64px auto 0;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .how h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .how p {
+      font-size: 0.95rem;
+      color: #a5b4fc;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .how svg {
+      max-width: 440px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 80px;
+      padding: 32px 24px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    footer a {
+      color: #818cf8;
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    footer .footer-links {
+      margin-bottom: 8px;
+    }
+
+    footer .footer-links a + a::before {
+      content: " · ";
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-logo">
+      <!-- pmicon.svg -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+        <defs>
+          <linearGradient id="hdr-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4F46E5" />
+            <stop offset="100%" stop-color="#7C3AED" />
+          </linearGradient>
+          <filter id="hdr-shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#0A051D" flood-opacity="0.35"/>
+          </filter>
+        </defs>
+        <rect width="128" height="128" rx="38" fill="url(#hdr-bg)" />
+        <rect x="2" y="2" width="124" height="124" rx="36" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.15" />
+        <g filter="url(#hdr-shadow)">
+          <path d="M64,22 L100,32 C100,64 84,91 64,106 C44,91 28,64 28,32 Z" fill="#FFFFFF" />
+          <text x="64" y="59" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="25" font-weight="900" letter-spacing="-0.5" fill="#4F46E5" text-anchor="middle" dominant-baseline="central">PM</text>
+        </g>
+      </svg>
+      <h1>Prompt Masker</h1>
+    </div>
+    <p class="tagline">Shield your data from AI leaks.</p>
+    <!-- TODO: add CWS link -->
+    <a class="cta-btn" href="#">Install on Chrome</a>
+  </header>
+
+  <!-- Hero marquee visual -->
+  <section class="hero">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 560">
+      <defs>
+        <linearGradient id="hero-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1E1B4B" />
+          <stop offset="50%" stop-color="#4F46E5" />
+          <stop offset="100%" stop-color="#4338CA" />
+        </linearGradient>
+        <filter id="hero-win-shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#03010A" flood-opacity="0.55"/>
+        </filter>
+        <filter id="hero-modal-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.3"/>
+        </filter>
+      </defs>
+      <rect width="1400" height="560" fill="url(#hero-grad)" />
+      <g transform="translate(90, 155)" filter="url(#hero-win-shadow)">
+        <path d="M48,12 L90,26 C90,68 72,104 48,120 C24,104 6,68 6,26 Z" fill="#FFFFFF" />
+        <text x="48" y="72" font-family="system-ui, sans-serif" font-size="34" font-weight="900" fill="#4F46E5" text-anchor="middle">PM</text>
+        <text x="130" y="55" font-family="system-ui, sans-serif" font-size="56" font-weight="900" fill="#FFFFFF" letter-spacing="-1.5">Prompt Masker</text>
+        <text x="130" y="110" font-family="system-ui, sans-serif" font-size="24" font-weight="600" fill="#E0E7FF" opacity="0.95">Shield your data from AI leaks.</text>
+        <text x="130" y="142" font-family="system-ui, sans-serif" font-size="16" font-weight="400" fill="#C7D2FE" opacity="0.8">Hide private info in ChatGPT, Gemini and Claude cleanly.</text>
+      </g>
+      <g transform="translate(740, 70)" filter="url(#hero-win-shadow)">
+        <rect width="570" height="420" rx="16" fill="#F0F4F9" />
+        <rect width="570" height="48" rx="16" fill="#FFFFFF" />
+        <text x="24" y="29" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#444746">Gemini</text>
+        <circle cx="530" cy="24" r="12" fill="#4F46E5" />
+        <text x="50" y="110" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#E3E3E3">Where should we start?</text>
+        <rect x="50" y="150" width="470" height="80" rx="20" fill="#FFFFFF" />
+        <text x="70" y="185" font-family="system-ui, sans-serif" font-size="13" fill="#C2C2C2">My personal email address is John.Doe@email.com...</text>
+        <rect width="570" height="420" rx="16" fill="#000000" fill-opacity="0.4" />
+        <g transform="translate(65, 55)" filter="url(#hero-modal-shadow)">
+          <rect width="440" height="290" rx="24" fill="#FFFFFF" />
+          <text x="415" y="32" font-family="system-ui, sans-serif" font-size="16" font-weight="400" fill="#757575" text-anchor="middle">✕</text>
+          <g transform="translate(198, 24)">
+            <path d="M22,2 L40,8 C40,24 29,37 22,44 C15,37 4,24 4,8 Z" fill="none" stroke="#7FB1CE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M22,2 L22,44" stroke="#7FB1CE" stroke-width="1.5" opacity="0.7" />
+          </g>
+          <text x="220" y="105" font-family="system-ui,-apple-system,sans-serif" font-size="21" font-weight="700" fill="#1F1F1F" text-anchor="middle">Security Warning</text>
+          <text x="220" y="142" font-family="system-ui, sans-serif" font-size="13" font-weight="400" fill="#444746" text-anchor="middle">
+            <tspan x="220" dy="0">Your message appears to contain sensitive data:</tspan>
+            <tspan x="220" dy="18" fill="#1F1F1F" font-weight="600">John.Doe@email.com</tspan>
+            <tspan x="220" dy="20">Are you sure you want to send it?</tspan>
+          </text>
+          <g transform="translate(32, 215)">
+            <rect width="180" height="44" rx="22" fill="#0B57D0" />
+            <text x="90" y="26" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Mask &amp; Send</text>
+            <rect x="196" width="180" height="44" rx="22" fill="#F0F4F9" />
+            <text x="286" y="26" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#0B57D0" text-anchor="middle">Continue anyway</text>
+          </g>
+        </g>
+      </g>
+    </svg>
+  </section>
+
+  <!-- Feature cards -->
+  <section class="features">
+    <div class="card">
+      <div class="card-icon">🔍</div>
+      <h3>Detects sensitive data</h3>
+      <p>Scans for API keys, passwords, email addresses, credit card numbers, SSNs, and more — before you hit send.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🤖</div>
+      <h3>Works where you work</h3>
+      <p>Monitors your inputs on ChatGPT, Google Gemini, and Claude.ai. No setup required — just install and go.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <h3>Zero-network, fully local</h3>
+      <p>All scanning happens on your device. No data is ever sent to any server. Your text stays yours.</p>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how">
+    <h2>Catch leaks before they happen</h2>
+    <p>Prompt Masker watches your input in real time and alerts you the moment sensitive data is detected — giving you the choice to mask it automatically or continue anyway.</p>
+    <!-- pm-svg.svg tile -->
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 280">
+      <defs>
+        <linearGradient id="tile-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#4F46E5" />
+          <stop offset="100%" stop-color="#7C3AED" />
+        </linearGradient>
+        <filter id="tile-shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#05020C" flood-opacity="0.4"/>
+        </filter>
+      </defs>
+      <rect width="440" height="280" fill="url(#tile-grad)" />
+      <rect x="4" y="4" width="432" height="272" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.15" />
+      <g transform="translate(24, 28)" filter="url(#tile-shadow)">
+        <path d="M36,10 L62,18 C62,42 49,63 36,75 C23,63 10,42 10,18 Z" fill="#FFFFFF" />
+        <text x="36" y="47" font-family="system-ui, sans-serif" font-size="18" font-weight="900" fill="#4F46E5" text-anchor="middle">PM</text>
+        <text x="82" y="38" font-family="system-ui, sans-serif" font-size="28" font-weight="800" fill="#FFFFFF" letter-spacing="-0.5">Prompt Masker</text>
+        <text x="82" y="60" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="#E0E7FF" opacity="0.9">Shield your data from AI leaks</text>
+      </g>
+      <g transform="translate(24, 130)" filter="url(#tile-shadow)">
+        <rect width="392" height="116" rx="16" fill="#FFFFFF" />
+        <text x="16" y="32" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="400" fill="#1F1F1F">
+          My personal email address is <tspan fill="#4F46E5" font-weight="600">John.Doe@email.com</tspan>
+        </text>
+        <circle cx="28" cy="72" r="10" fill="#F0F4F9" />
+        <path d="M24,72 L32,72 M28,68 L28,76" stroke="#444746" stroke-width="1.5" stroke-linecap="round" />
+        <rect x="46" y="64" width="48" height="16" rx="8" fill="#F0F4F9" />
+        <circle cx="54" cy="72" r="3" fill="#444746" />
+        <rect x="62" y="69" width="24" height="6" rx="3" fill="#444746" />
+        <circle cx="364" cy="72" r="16" fill="#E9EEF6" />
+        <path d="M356,72 L370,66 L365,72 L370,78 Z" fill="#A8C7FA" />
+        <g transform="translate(0, 92)">
+          <path d="M0,0 L392,0 L392,16 C392,20 384,24 376,24 L16,24 C8,24 0,20 0,16 Z" fill="#FCE8E6" />
+          <circle cx="14" cy="12" r="4" fill="#EA4335" />
+          <text x="24" y="16" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#C5221F">High — sensitive data detected: email address</text>
+          <text x="380" y="15" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="#C5221F" text-anchor="middle">✕</text>
+        </g>
+      </g>
+    </svg>
+  </section>
+
+  <footer>
+    <div class="footer-links">
+      <a href="privacy_policy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </div>
+    <div>© 2026 Prompt Masker</div>
+  </footer>
+
+</body>
+</html>
