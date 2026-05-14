@@ -40,10 +40,19 @@ def main():
     print("Sending PRD to Claude...")
     raw = call_claude(prd, system)
 
-    # Strip markdown fences if Claude added them despite instructions
+    # Extract JSON from response — Claude sometimes wraps it in prose + fences.
     raw = raw.strip()
-    if raw.startswith("```"):
-        raw = raw.split("\n", 1)[1].rsplit("```", 1)[0]
+    if "```" in raw:
+        start = raw.index("```")
+        start = raw.index("\n", start) + 1
+        end = raw.index("```", start)
+        raw = raw[start:end].strip()
+    elif not raw.startswith(("[", "{")):
+        # Fall back: find first JSON array or object
+        for i, ch in enumerate(raw):
+            if ch in "[{":
+                raw = raw[i:]
+                break
 
     try:
         issues = json.loads(raw)
