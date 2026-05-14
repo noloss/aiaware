@@ -8,14 +8,16 @@
 </head>
 <body>
   <header>
-    <img src="../icons/icon48.png" alt="Prompt Masker logo" width="32" height="32" />
+    <svg class="pm-shield" viewBox="0 0 88 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M44,4 L82,18 C82,68 66,96 44,112 C22,96 6,68 6,18 Z" fill="#FFFFFF" />
+      <text x="44" y="70" font-family="system-ui, sans-serif" font-size="32" font-weight="900" fill="#4F46E5" text-anchor="middle">PM</text>
+    </svg>
     <h1>Prompt Masker</h1>
+    <p class="pm-tagline">Shield your data from AI leaks.</p>
   </header>
 
   <main>
-    <p id="status">Extension active — monitoring this page.</p>
-
-    <section class="pm-settings">
+    <section class="pm-settings pm-card">
       <div class="pm-toggle-row">
         <span class="pm-toggle-label">Shadow Block</span>
         <span class="pm-badge-on">Always on</span>
@@ -36,7 +38,7 @@
       fully satisfied: the Zero-Network / no-server privacy statement is
       prominently displayed and zero outbound network requests are made.
     -->
-    <section class="pm-zero-network" aria-label="Zero-Network privacy notice">
+    <section class="pm-zero-network pm-card" aria-label="Zero-Network privacy notice">
       <div class="pm-zero-network-header">
         <span class="pm-zero-network-icon" aria-hidden="true">🛡️</span>
         <span class="pm-zero-network-badge">Zero-Network</span>
@@ -46,7 +48,7 @@
       </p>
     </section>
 
-    <section class="pm-activity" aria-label="Recent Activity">
+    <section class="pm-activity pm-card" aria-label="Recent Activity">
       <div class="pm-activity-header">
         <span class="pm-activity-title">Recent Activity</span>
         <button id="pm-clear-history" class="pm-btn-clear">Clear history</button>

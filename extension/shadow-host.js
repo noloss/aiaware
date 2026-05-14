@@ -170,7 +170,7 @@ const PM_COMBINED_CSS = /* css */`
 .pm-actions {
   display: flex;
   gap: 10px;
-  justify-content: flex-end;
+  justify-content: center;
   margin-top: 4px;
 }
 
@@ -184,6 +184,8 @@ const PM_COMBINED_CSS = /* css */`
   cursor: pointer;
   transition: background-color 0.12s ease, opacity 0.12s ease;
   white-space: nowrap;
+  flex: 0 25%;
+  text-align: center;
 }
 
 .pm-btn:focus-visible {

@@ -1,45 +1,65 @@
-/* Minimal popup styles */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  width: 280px;
+  width: 360px;
   font-family: system-ui, sans-serif;
   font-size: 14px;
   color: #1e1b4b;
-  background: #f5f3ff;
+  background: #F0F4F9;
 }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
 
 header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: #6366f1;
+  padding: 28px 20px 24px;
+  background: linear-gradient(135deg, #1E1B4B 0%, #4F46E5 60%, #4338CA 100%);
   color: #fff;
+  text-align: center;
+}
+
+.pm-shield {
+  width: 52px;
+  height: 66px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
 header h1 {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+
+.pm-tagline {
+  margin-top: 5px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #C7D2FE;
   letter-spacing: 0.01em;
 }
 
+/* ── Main body ───────────────────────────────────────────────────────────── */
+
 main {
-  padding: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-#status {
-  color: #4338ca;
-  font-size: 13px;
+/* Shared card shell */
+.pm-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* ── Settings section ────────────────────────────────────────────────────── */
-
-.pm-settings {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #e0e7ff;
-}
+/* ── Settings card ───────────────────────────────────────────────────────── */
 
 .pm-toggle-row {
   display: flex;
@@ -54,34 +74,32 @@ main {
   color: #1e1b4b;
 }
 
-/* "Always on" badge replaces the checkbox when a feature has no user toggle */
 .pm-badge-on {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   color: #166534;
   background: #dcfce7;
   border: 1px solid #86efac;
-  border-radius: 4px;
-  padding: 1px 7px;
+  border-radius: 6px;
+  padding: 2px 9px;
   white-space: nowrap;
   flex-shrink: 0;
+  letter-spacing: 0.01em;
 }
 
 .pm-setting-desc {
-  margin-top: 6px;
-  font-size: 11px;
+  margin-top: 8px;
+  font-size: 12px;
   color: #6b7280;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-/* ── Zero-Network privacy notice ─────────────────────────────────────────── */
+/* ── Zero-Network card ───────────────────────────────────────────────────── */
 
 .pm-zero-network {
-  margin-top: 12px;
-  padding: 10px 12px;
   background: #f0fdf4;
   border: 1px solid #86efac;
-  border-radius: 8px;
+  box-shadow: none;
 }
 
 .pm-zero-network-header {
@@ -92,7 +110,7 @@ main {
 }
 
 .pm-zero-network-icon {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
 }
 
@@ -101,29 +119,23 @@ main {
   font-weight: 700;
   color: #166534;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .pm-zero-network-msg {
-  font-size: 11px;
+  font-size: 12px;
   color: #15803d;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-/* ── Recent Activity section ─────────────────────────────────────────────── */
-
-.pm-activity {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #e0e7ff;
-}
+/* ── Activity card ───────────────────────────────────────────────────────── */
 
 .pm-activity-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .pm-activity-title {
@@ -138,12 +150,12 @@ main {
   color: #6366f1;
   background: none;
   border: 1px solid #c7d2fe;
-  border-radius: 4px;
-  padding: 2px 8px;
+  border-radius: 6px;
+  padding: 2px 9px;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.1s, color 0.1s;
+  transition: background 0.12s, color 0.12s;
 }
 
 .pm-btn-clear:hover {
@@ -155,22 +167,29 @@ main {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .pm-activity-item {
-  font-size: 11px;
+  font-size: 12px;
   color: #374151;
   line-height: 1.5;
-  padding: 4px 8px;
-  background: #fff;
+  padding: 6px 10px 6px 12px;
+  background: #F8FAFC;
   border: 1px solid #e0e7ff;
-  border-radius: 4px;
+  border-radius: 8px;
+  border-left: 3px solid #e0e7ff;
   word-break: break-word;
 }
 
+.pm-activity-item[data-severity="high"]   { border-left-color: #EF4444; }
+.pm-activity-item[data-severity="medium"] { border-left-color: #F97316; }
+.pm-activity-item[data-severity="low"]    { border-left-color: #EAB308; }
+
 .pm-activity-empty {
-  font-size: 11px;
+  font-size: 12px;
   color: #9ca3af;
   font-style: italic;
+  text-align: center;
+  padding: 4px 0;
 }
