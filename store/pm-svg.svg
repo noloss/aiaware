@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 280" width="440" height="280">
+  <defs>
+    <linearGradient id="tileGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+    
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#05020C" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <rect width="440" height="280" fill="url(#tileGradient)" />
+  <rect x="4" y="4" width="432" height="272" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-opacity="0.15" />
+
+  <g transform="translate(24, 28)" filter="url(#dropShadow)">
+    <path d="M36,10 L62,18 C62,42 49,63 36,75 C23,63 10,42 10,18 Z" fill="#FFFFFF" />
+    <text x="36" y="47" font-family="system-ui, sans-serif" font-size="18" font-weight="900" fill="#4F46E5" text-anchor="middle">PM</text>
+    
+    <text x="82" y="38" font-family="system-ui, sans-serif" font-size="28" font-weight="800" fill="#FFFFFF" letter-spacing="-0.5">Prompt Masker</text>
+    <text x="82" y="60" font-family="system-ui, sans-serif" font-size="13" font-weight="500" fill="#E0E7FF" opacity="0.9">Shield your data from AI leaks</text>
+  </g>
+
+  <g transform="translate(24, 130)" filter="url(#dropShadow)">
+    <rect width="392" height="116" rx="16" fill="#FFFFFF" />
+    
+    <text x="16" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="400" fill="#1F1F1F">
+      My personal email address is <tspan fill="#4F46E5" font-weight="600">John.Doe@email.com</tspan>
+    </text>
+    
+    <circle cx="28" cy="72" r="10" fill="#F0F4F9" />
+    <path d="M24,72 L32,72 M28,68 L28,76" stroke="#444746" stroke-width="1.5" stroke-linecap="round" />
+    <rect x="46" y="64" width="48" height="16" rx="8" fill="#F0F4F9" />
+    <circle cx="54" cy="72" r="3" fill="#444746" />
+    <rect x="62" y="69" width="24" height="6" rx="3" fill="#444746" />
+    
+    <circle cx="364" cy="72" r="16" fill="#E9EEF6" />
+    <path d="M356,72 L370,66 L365,72 L370,78 Z" fill="#A8C7FA" />
+
+    <g transform="translate(0, 92)">
+      <path d="M0,0 L392,0 L392,16 C392,20 384,24 376,24 L16,24 C8,24 0,20 0,16 Z" fill="#FCE8E6" />
+      <circle cx="14" cy="12" r="4" fill="#EA4335" />
+      <text x="24" y="16" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="#C5221F">High – sensitive data detected: email address</text>
+      <text x="380" y="15" font-family="system-ui, sans-serif" font-size="11" font-weight="500" fill="#C5221F" text-anchor="middle">×</text>
+    </g>
+  </g>
+</svg>

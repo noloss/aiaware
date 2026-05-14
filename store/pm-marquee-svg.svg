@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 560" width="1400" height="560">
+  <defs>
+    <linearGradient id="marqueeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B4B" />
+      <stop offset="50%" stop-color="#4F46E5" />
+      <stop offset="100%" stop-color="#4338CA" />
+    </linearGradient>
+
+    <filter id="windowShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#03010A" flood-opacity="0.55"/>
+    </filter>
+    
+    <filter id="modalShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <rect width="1400" height="560" fill="url(#marqueeGradient)" />
+
+  <g transform="translate(90, 155)" filter="url(#windowShadow)">
+    <path d="M48,12 L90,26 C90,68 72,104 48,120 C24,104 6,68 6,26 Z" fill="#FFFFFF" />
+    <text x="48" y="72" font-family="system-ui, sans-serif" font-size="34" font-weight="900" fill="#4F46E5" text-anchor="middle">PM</text>
+    
+    <text x="130" y="55" font-family="system-ui, sans-serif" font-size="56" font-weight="900" fill="#FFFFFF" letter-spacing="-1.5">Prompt Masker</text>
+    <text x="130" y="110" font-family="system-ui, sans-serif" font-size="24" font-weight="600" fill="#E0E7FF" opacity="0.95">Shield your data from AI leaks.</text>
+    <text x="130" y="142" font-family="system-ui, sans-serif" font-size="16" font-weight="400" fill="#C7D2FE" opacity="0.8">Hide private info in ChatGPT, Gemini and Claude cleanly.</text>
+  </g>
+
+  <g transform="translate(740, 70)" filter="url(#windowShadow)">
+    <rect width="570" height="420" rx="16" fill="#F0F4F9" />
+    
+    <rect width="570" height="48" rx="16" fill="#FFFFFF" />
+    <text x="24" y="29" font-family="system-ui, sans-serif" font-size="15" font-weight="600" fill="#444746">Gemini</text>
+    <circle cx="530" cy="24" r="12" fill="#4F46E5" />
+    
+    <text x="50" y="110" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#E3E3E3">Where should we start?</text>
+    <rect x="50" y="150" width="470" height="80" rx="20" fill="#FFFFFF" />
+    <text x="70" y="185" font-family="system-ui, sans-serif" font-size="13" fill="#C2C2C2">My personal email address is John.Doe@email.com...</text>
+
+    <rect width="570" height="420" rx="16" fill="#000000" fill-opacity="0.4" />
+
+    <g transform="translate(65, 55)" filter="url(#modalShadow)">
+      <rect width="440" height="290" rx="24" fill="#FFFFFF" />
+      
+      <text x="415" y="32" font-family="system-ui, sans-serif" font-size="16" font-weight="400" fill="#757575" text-anchor="middle">×</text>
+
+      <g transform="translate(198, 24)">
+        <path d="M22,2 L40,8 C40,24 29,37 22,44 C15,37 4,24 4,8 Z" fill="none" stroke="#7FB1CE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M22,2 L22,44" stroke="#7FB1CE" stroke-width="1.5" opacity="0.7" />
+      </g>
+
+      <text x="220" y="105" font-family="system-ui, -apple-system, sans-serif" font-size="21" font-weight="700" fill="#1F1F1F" text-anchor="middle">Security Warning</text>
+      
+      <text x="220" y="142" font-family="system-ui, sans-serif" font-size="13" font-weight="400" fill="#444746" text-anchor="middle">
+        <tspan x="220" dy="0">Your message appears to contain sensitive data:</tspan>
+        <tspan x="220" dy="18" fill="#1F1F1F" font-weight="600">John.Doe@email.com</tspan>
+        <tspan x="220" dy="20">Are you sure you want to send it?</tspan>
+      </text>
+
+      <g transform="translate(32, 215)">
+        <rect width="180" height="44" rx="22" fill="#0B57D0" />
+        <text x="90" y="26" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">Mask &amp; Send</text>
+
+        <rect x="196" width="180" height="44" rx="22" fill="#F0F4F9" />
+        <text x="286" y="26" font-family="system-ui, sans-serif" font-size="14" font-weight="600" fill="#0B57D0" text-anchor="middle">Continue anyway</text>
+      </g>
+    </g>
+  </g>
+</svg>
