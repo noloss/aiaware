@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Prompt Masker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f1117;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      padding: 0 0 48px;
+    }
+    header {
+      background: #161b27;
+      border-bottom: 1px solid #2d3748;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    header .shield { font-size: 40px; display: block; margin-bottom: 8px; }
+    header h1 { font-size: 24px; font-weight: 700; color: #f1f5f9; }
+    header p { color: #94a3b8; font-size: 13px; margin-top: 4px; }
+    .container {
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin: 36px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #2d3748;
+    }
+    p { margin-bottom: 14px; color: #cbd5e1; }
+    ul { margin: 0 0 14px 20px; color: #cbd5e1; }
+    li { margin-bottom: 6px; }
+    a { color: #60a5fa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer {
+      margin-top: 48px;
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+      border-top: 1px solid #2d3748;
+      padding-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="shield">🛡️</span>
+    <h1>Privacy Policy</h1>
+    <p>Prompt Masker &mdash; Last updated: 2026-05-14</p>
+  </header>
+
+  <div class="container">
+
+    <h2>1. What the Extension Does</h2>
+    <p>
+      Prompt Masker is a Chrome extension that monitors text you type into AI chat services
+      (Claude.ai, ChatGPT, Gemini) and warns you in real time when potentially sensitive data
+      &mdash; such as API keys, credit card numbers, or personal identifiers &mdash; is detected
+      before it is sent.
+    </p>
+    <p>
+      All detection happens locally in your browser. No text you type is ever transmitted to
+      any server operated by the extension developer.
+    </p>
+
+    <h2>2. Data Collected</h2>
+    <p>
+      Prompt Masker collects no personal data and sends no data over the network. Specifically:
+    </p>
+    <ul>
+      <li>Your typed text is processed entirely on-device and never leaves your browser.</li>
+      <li>An optional audit log (last 50 triggered warnings) is stored in
+          <code>chrome.storage.local</code> on your device only.</li>
+      <li>No analytics, telemetry, or usage data is collected.</li>
+      <li>No cookies are set. No remote servers are contacted.</li>
+    </ul>
+
+    <h2>3. No Accuracy Guarantee</h2>
+    <p>
+      The extension uses pattern-matching heuristics to detect sensitive data. This means:
+    </p>
+    <ul>
+      <li>It may <strong>miss sensitive data</strong> (false negatives) &mdash; some sensitive
+          content may not be detected.</li>
+      <li>It may produce <strong>false alarms</strong> (false positives) &mdash; some harmless
+          text may be flagged as sensitive.</li>
+    </ul>
+    <p>
+      You remain responsible for reviewing what you submit to AI services. The extension is a
+      best-effort safety net, not a guarantee.
+    </p>
+
+    <h2>4. Permissions</h2>
+    <p>The extension requests the following Chrome permissions:</p>
+    <ul>
+      <li><strong>activeTab / scripting</strong> — to inject the DLP content script into AI chat pages.</li>
+      <li><strong>storage</strong> — to persist your settings and audit log in <code>chrome.storage.local</code>.</li>
+    </ul>
+    <p>No host permissions beyond the supported AI chat sites are requested.</p>
+
+    <h2>5. Children's Privacy</h2>
+    <p>
+      Prompt Masker is not directed at children under 13. We do not knowingly collect any
+      information from children. If you believe a child has used the extension in a way that
+      raises a privacy concern, please contact us using the address below.
+    </p>
+
+    <h2>6. Policy Changes</h2>
+    <p>
+      Changes to this policy will be reflected by updating the &ldquo;Last updated&rdquo; date
+      above. Continued use of the extension after such changes constitutes acceptance of the
+      updated policy. We will not make material changes without updating this page.
+    </p>
+
+    <h2>7. Contact</h2>
+    <p>
+      Questions about this privacy policy can be sent to
+      <a href="mailto:otto.olsson@gmail.com">otto.olsson@gmail.com</a>.
+    </p>
+
+  </div>
+
+  <footer>
+    <p>
+      Prompt Masker &mdash; Zero-Network, on-device protection.<br />
+      <a href="terms.html">Terms of Use</a>
+    </p>
+  </footer>
+</body>
+</html>
