@@ -136,6 +136,27 @@
       color: #cbd5e0;
     }
 
+    .warning-box {
+      background: #1a1a2e;
+      border: 1px solid #d69e2e;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+    }
+
+    .warning-box strong {
+      display: block;
+      color: #f6e05e;
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .warning-box p {
+      color: #b7791f;
+      font-size: 0.9rem;
+      margin-bottom: 0;
+    }
+
     .data-table {
       width: 100%;
       border-collapse: collapse;
@@ -182,6 +203,10 @@
       color: #4a5568;
     }
 
+    footer a {
+      color: #718096;
+    }
+
     a {
       color: #63b3ed;
       text-decoration: none;
@@ -217,18 +242,18 @@
     </div>
 
     <!-- ── 1. What the extension does ───────────────────────────────────── -->
-    <h2>1. What Prompt Masker Does</h2>
+    <h2>1. What the Extension Does</h2>
     <p>
       Prompt Masker is a Chrome browser extension that inspects text you are about to
       submit to AI chat interfaces (such as Claude, Gemini, and ChatGPT) and warns
-      you when it detects sensitive or risky content — for example, API keys,
-      passwords, personal identifiers, or prompt-injection patterns. All detection
-      logic runs locally in your browser using JavaScript; no text is ever sent
-      elsewhere.
+      you when it detects potentially sensitive content — for example, API keys,
+      passwords, credit card numbers, personal identifiers, or prompt-injection
+      patterns. All detection logic runs locally in your browser using JavaScript;
+      no text is ever sent elsewhere.
     </p>
 
-    <!-- ── 2. Data we collect ────────────────────────────────────────────── -->
-    <h2>2. Data We Collect</h2>
+    <!-- ── 2. Data collected ─────────────────────────────────────────────── -->
+    <h2>2. Data Collected</h2>
     <p>
       <strong>We collect nothing.</strong> Prompt Masker does not collect, process on
       a remote server, transmit, or share any data about you or your activity.
@@ -277,8 +302,31 @@
       leaves your browser.
     </div>
 
-    <!-- ── 3. Permissions ────────────────────────────────────────────────── -->
-    <h2>3. Permissions We Request and Why</h2>
+    <!-- ── 3. No accuracy guarantee ─────────────────────────────────────── -->
+    <h2>3. No Accuracy Guarantee</h2>
+    <p>
+      Prompt Masker uses pattern-matching heuristics to detect potentially sensitive
+      data. <strong>This approach is imperfect by design.</strong> The extension may
+      miss sensitive data that is present in your text (false negatives), and it may
+      flag content that is not actually sensitive (false alarms / false positives).
+    </p>
+    <div class="warning-box">
+      <strong>You remain responsible for reviewing what you send to AI services.</strong>
+      <p>
+        Do not rely solely on Prompt Masker to catch all sensitive information.
+        Always review your prompts before submitting them — especially when they
+        contain code, credentials, personal data, or confidential business information.
+        Prompt Masker is a helpful safety net, not a guarantee.
+      </p>
+    </div>
+    <p>
+      By using this extension you acknowledge that detection may be incomplete and
+      that you bear full responsibility for any data you choose to submit to third-party
+      AI services.
+    </p>
+
+    <!-- ── 4. Permissions ────────────────────────────────────────────────── -->
+    <h2>4. Permissions</h2>
     <ul>
       <li>
         <strong>storage</strong> — saves your on/off preference to
@@ -294,31 +342,16 @@
       </li>
     </ul>
 
-    <!-- ── 4. Third-party services ───────────────────────────────────────── -->
-    <h2>4. Third-Party Services</h2>
-    <p>
-      Prompt Masker does not integrate with, call, or depend on any third-party
-      service, API, analytics platform, or remote resource. The extension bundles
-      no external scripts, fonts, or tracking pixels.
-    </p>
-
-    <!-- ── 5. Data sharing ───────────────────────────────────────────────── -->
-    <h2>5. Data Sharing and Sale</h2>
-    <p>
-      We do not sell, rent, trade, or otherwise transfer any user data to outside
-      parties — because we never receive any user data in the first place.
-    </p>
-
-    <!-- ── 6. Children's privacy ────────────────────────────────────────── -->
-    <h2>6. Children's Privacy</h2>
+    <!-- ── 5. Children's Privacy ────────────────────────────────────────── -->
+    <h2>5. Children's Privacy</h2>
     <p>
       Prompt Masker does not knowingly collect information from any users, including
       children under the age of 13. No personal data of any kind is collected by
       this extension.
     </p>
 
-    <!-- ── 7. Changes to this policy ────────────────────────────────────── -->
-    <h2>7. Changes to This Policy</h2>
+    <!-- ── 6. Policy Changes ─────────────────────────────────────────────── -->
+    <h2>6. Policy Changes</h2>
     <p>
       If this policy is updated, the "Last updated" date at the top of this page
       will be revised. We will not make changes that weaken these privacy
@@ -326,8 +359,8 @@
       notes.
     </p>
 
-    <!-- ── 8. Contact ────────────────────────────────────────────────────── -->
-    <h2>8. Contact</h2>
+    <!-- ── 7. Contact ────────────────────────────────────────────────────── -->
+    <h2>7. Contact</h2>
     <p>
       Questions or concerns about this policy? Open an issue on the
       <a href="https://github.com/noloss/promptmasker" target="_blank"
@@ -337,8 +370,9 @@
     </p>
 
     <footer>
-      &copy; 2026 Prompt Masker &mdash; This privacy policy is also bundled with the
-      extension at <code>privacy_policy.html</code>.
+      &copy; 2026 Prompt Masker &mdash; This privacy policy is bundled with the
+      extension at <code>privacy_policy.html</code>. &nbsp;|&nbsp;
+      <a href="terms.html">Terms of Use</a>
     </footer>
 
   </div>
