@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from framework.coder import run_issue
 from framework.config import CLAUDE_BIN, GITHUB_REPO, PROMPTS_DIR
@@ -113,7 +113,7 @@ def run_tests() -> tuple[bool, str]:
     print("\n[tests] Running test suite...")
     result = subprocess.run(
         [_resolve_node(), "--test"],
-        cwd=Path(__file__).parent,
+        cwd=Path(__file__).parent.parent,
         capture_output=True,
         text=True,
         timeout=TEST_TIMEOUT,

@@ -46,7 +46,7 @@ framework/            # Agent pipeline — not shipped in the extension
   planner.py          # PRD → GitHub Issues
   coder.py            # Issue → branch + code + PR
   reviewer.py         # PR → review + approve/request changes
-  run_release.py      # Batch runner: --release <label> runs coder+reviewer loop
+  run_release.py      # Orchestrator: --release <label> runs full coder+reviewer loop
   github.py           # gh CLI wrapper
   config.py           # Env vars (GITHUB_REPO etc.)
   prompts/            # System prompts for each agent
@@ -64,7 +64,7 @@ prd_hardening.md      # Security hardening requirements (Release hardening)
 python framework/planner.py                      # Create GitHub Issues from a PRD file
 python framework/coder.py --issue <N>            # Implement issue on a branch + open PR
 python framework/reviewer.py --pr <N>            # Review PR, approve or request changes
-python framework/run_release.py --release <label> # Run full coder+reviewer loop for a label
+python framework/run_release.py --release <label>  # Run full coder+reviewer loop for a label
 ```
 
 The coder agent runs as a `claude --print --dangerously-skip-permissions` subprocess so it has
