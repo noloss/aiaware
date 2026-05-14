@@ -108,6 +108,8 @@ const PM_COMBINED_CSS = /* css */`
 
 /* ── Full-screen semi-transparent backdrop ───────────────────────────────── */
 .pm-overlay {
+  all: initial;
+  pointer-events: auto;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
@@ -120,6 +122,8 @@ const PM_COMBINED_CSS = /* css */`
 
 /* ── Centered dialog card ────────────────────────────────────────────────── */
 .pm-dialog {
+  all: initial;
+  display: block;
   position: relative;
   background: #fff;
   border-radius: 10px;
@@ -157,6 +161,8 @@ const PM_COMBINED_CSS = /* css */`
 
 /* ── Corner × dismiss button ─────────────────────────────────────────────── */
 .pm-dialog-close {
+  all: initial;
+  display: inline-block;
   position: absolute;
   top: 10px;
   right: 12px;
