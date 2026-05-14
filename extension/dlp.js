@@ -881,7 +881,7 @@
     maskBtn.className = 'pm-btn pm-btn-close';
     maskBtn.textContent = 'Mask & Send';
     maskBtn.addEventListener('click', () => {
-      if (activeInputEl) {
+      if (activeInputEl && document.contains(activeInputEl)) {
         const masked = maskText(getInputText(activeInputEl));
         setInputValue(activeInputEl, masked);
       }
