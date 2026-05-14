@@ -1,7 +1,7 @@
 // shadow-host.js — Creates the Shadow DOM host for all Prompt Masker extension UI.
 //
 // Must be listed FIRST in manifest.json content_scripts so that
-// window.__pmShadowRoot is available before modal.js, dlp.js, and highlight.js run.
+// window.__pmShadowRoot is available before modal.js, dlp.js, and audit.js run.
 //
 // Architecture:
 //   #aa-shadow-host  — fixed, full-screen, pointer-events:none in the light DOM.
@@ -216,7 +216,7 @@ const PM_COMBINED_CSS = /* css */`
 }
 
 /* ==========================================================================
-   dlp.css — DLP banner, severity variants, and in-field highlight spans.
+   dlp.css — DLP banner and severity variants.
    ========================================================================== */
 
 /* ── DLP warning banner ──────────────────────────────────────────────────── */
@@ -286,27 +286,6 @@ const PM_COMBINED_CSS = /* css */`
   color: #991B1B;
 }
 
-/* ── In-field highlight spans ─────────────────────────────────────────────── */
-.pm-hl-high {
-  background: rgba(239, 68, 68, 0.35);
-  border-radius: 2px;
-}
-
-.pm-hl-medium {
-  background: rgba(249, 115, 22, 0.35);
-  border-radius: 2px;
-}
-
-.pm-hl-low {
-  background: rgba(234, 179, 8, 0.35);
-  border-radius: 2px;
-}
-
-/* ── Textarea backdrop ────────────────────────────────────────────────────── */
-#pm-hl-backdrop {
-  all: unset;
-  display: block;
-}
 `;
 
 // ── Shadow host setup ─────────────────────────────────────────────────────────

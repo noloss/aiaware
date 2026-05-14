@@ -619,7 +619,6 @@
       if (Date.now() - _lastPasteTime < 1000) return;
       _hasHighAlert = false;
       hideBanner();
-      window.promptMaskerHighlight?.clearHighlights(el);
       return;
     }
     debounceTimers.set(el, setTimeout(() => {
@@ -631,17 +630,12 @@
         // Append a record to the local audit log (no matched text stored).
         // audit.js is injected before dlp.js and exposes this global.
         window.promptMaskerAudit?.append(hits);
-        // Render in-field colour highlights so users see exactly which words
-        // are risky before they send.  aiAwareHighlight is loaded by
-        // highlight.js which is injected before dlp.js.
-        window.promptMaskerHighlight?.highlightText(el, hits);
       } else {
         // Don't clear the alert if a paste with hits just ran — Gemini's element
         // may store text in a form scanText can't read, causing a false no-hits result.
         if (Date.now() - _lastPasteTime < 1000) return;
         _hasHighAlert = false;
         hideBanner();
-        window.promptMaskerHighlight?.clearHighlights(el);
       }
     }, DEBOUNCE_MS));
   }
@@ -729,7 +723,6 @@
         if (affected) {
           _hasHighAlert = false;
           hideBanner();
-          window.promptMaskerHighlight?.clearHighlights(activeInputEl);
         }
       }
     } catch (err) {
@@ -862,10 +855,6 @@
     maskBtn.textContent = 'Mask & Send';
     maskBtn.addEventListener('click', () => {
       if (activeInputEl) {
-        // Remove highlight spans before rewriting the value so that no
-        // <span data-pm-hl> tags are present in the contenteditable when
-        // setInputValue() reads or replaces the content.
-        window.promptMaskerHighlight?.clearHighlights(activeInputEl);
         const masked = maskText(getInputText(activeInputEl));
         setInputValue(activeInputEl, masked);
       }
@@ -883,9 +872,6 @@
     sendBtn.textContent = 'Continue anyway';
     sendBtn.addEventListener('click', () => {
       closeIntercept();
-      // Strip highlight spans before submitting so the platform never receives
-      // raw <span data-pm-hl> tags as part of the message content.
-      if (activeInputEl) window.promptMaskerHighlight?.clearHighlights(activeInputEl);
       clickPlatformSubmit();
     });
 
@@ -1028,17 +1014,9 @@
       showBanner(hits, monitoredEl);
       _lastPasteTime = Date.now();
       window.promptMaskerAudit?.append(hits);
-      requestAnimationFrame(() => {
-        try {
-          window.promptMaskerHighlight?.highlightText(monitoredEl, hits);
-        } catch (err) {
-          console.error('[Prompt Masker] DLP paste highlight error:', err, DLP_LOG_CTX);
-        }
-      });
     } else {
       _hasHighAlert = false;
       hideBanner();
-      window.promptMaskerHighlight?.clearHighlights(monitoredEl);
     }
   }, /* capture = */ true);
 
