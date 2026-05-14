@@ -19,7 +19,7 @@ Automatically blocks the Enter key when a HIGH-risk alert is active, so you can'
 
 Supports: Claude (claude.ai) · Gemini (gemini.google.com) · ChatGPT (chat.openai.com)
 
-Privacy policy: https://otto-olsson.github.io/promptsentinel/privacy_policy.html
+Privacy policy: https://noloss.github.io/promptmasker/privacy_policy.html
 
 # ── CATEGORY ─────────────────────────────────────────────────────────────────
 Productivity
@@ -34,11 +34,11 @@ screenshot1.png  — DLP Security Intercept modal blocking a message containing 
 promo_tile_440x280.png  — Brand tile: shield icon, extension name, key features summary
 
 # ── ICONS ────────────────────────────────────────────────────────────────────
-128×128: ../icons/icon128.png  ✓
+128×128: ../extension/icons/icon128.png  ✓
 
 # ── PRIVACY POLICY URL ───────────────────────────────────────────────────────
-https://otto-olsson.github.io/promptsentinel/privacy_policy.html
-# (Deploy extension/privacy_policy.html to GitHub Pages before submitting)
+https://noloss.github.io/promptmasker/privacy_policy.html
+# Hosted at docs/privacy_policy.html on main branch → noloss.github.io/promptmasker/
 
 # ── PERMISSIONS JUSTIFICATION (for reviewer) ─────────────────────────────────
 storage      — saves user preferences (enabled/disabled) to chrome.storage.local only;

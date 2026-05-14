@@ -32,7 +32,7 @@
 const PM_COMBINED_CSS = /* css */`
 
 /* ==========================================================================
-   dlp.css — DLP banner and severity variants.
+   _src/dlp.css — DLP banner and severity variants.
    ========================================================================== */
 
 /* ── DLP warning banner ──────────────────────────────────────────────────── */
@@ -103,7 +103,7 @@ const PM_COMBINED_CSS = /* css */`
 }
 
 /* ==========================================================================
-   modal.css — Security Intercept overlay styles.
+   _src/modal.css — Security Intercept overlay styles.
    ========================================================================== */
 
 /* ── Full-screen semi-transparent backdrop ───────────────────────────────── */
@@ -243,7 +243,7 @@ const PM_COMBINED_CSS = /* css */`
   //  • web_accessible_resources entries in manifest.json
   //  • any flash of unstyled content on the first modal open
   //
-  // Keep this string in sync with dlp.css.
+  // Keep this string in sync with _src/dlp.css.
   const style = document.createElement('style');
   style.textContent = PM_COMBINED_CSS;
   shadow.appendChild(style);
