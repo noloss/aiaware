@@ -179,7 +179,7 @@
     email: {
       re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/,
       label: 'email address',
-      severity: 'low',
+      severity: 'high',
       maskFn: maskEmail,
       /**
        * Reject addresses whose local part violates RFC 5321 rules:
