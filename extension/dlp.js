@@ -176,7 +176,28 @@
       },
       maskFn: maskSsn,
     },
-    email:    { re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/, label: 'email address',    severity: 'low',  maskFn: maskEmail },
+    email: {
+      re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/,
+      label: 'email address',
+      severity: 'low',
+      maskFn: maskEmail,
+      /**
+       * Reject addresses whose local part violates RFC 5321 rules:
+       *   – must not start with a dot
+       *   – must not end with a dot
+       *   – must not contain consecutive dots
+       * This prevents Markdown table separators (e.g. ---|---) and code
+       * snippets that happen to contain "@" from triggering false positives.
+       */
+      validate(match) {
+        const atIdx = match.indexOf('@');
+        if (atIdx < 0) return false;
+        const local = match.slice(0, atIdx);
+        if (local.startsWith('.') || local.endsWith('.')) return false;
+        if (local.includes('..')) return false;
+        return true;
+      },
+    },
     // ReDoS-safe password pattern.
     //
     // The value capture (\S{1,200}) is bounded so that a pathological input
